@@ -20,13 +20,16 @@ use App\Http\Middleware\{
     setLanguage,
 };
 
-Route::redirect("/", "id");
+// ponytail: locale prefix (/en, /id) disabled for now — serve index directly.
+// Re-enable by restoring the redirect + setLanguage group below.
+Route::get("/", [IndexController::class, "index"])->name("index");
 
-Route::middleware([setLanguage::class])->group(function () {
-    Route::group(["prefix" => "{lang}"], function () {
-        Route::get("/", [IndexController::class, "index"])->name("index");
-    });
-});
+// Route::redirect("/", "id");
+// Route::middleware([setLanguage::class])->group(function () {
+//     Route::group(["prefix" => "{lang}"], function () {
+//         Route::get("/", [IndexController::class, "index"])->name("index");
+//     });
+// });
 
 Route::get("/cms/rest-map", [LocalServiceController::class, "index"]);
 Route::get("/cms/rest-map/{id}", [
