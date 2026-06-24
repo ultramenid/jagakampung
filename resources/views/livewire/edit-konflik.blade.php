@@ -119,11 +119,18 @@
                 </div>
                 <div>
                     <label class="gk-label">Status</label>
-                    <select wire:model.live="selectedStatus" class="gk-select">
-                        <option value="">Pilih status</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="potensi">Potensi</option>
-                    </select>
+                    @if (session('role_id') === 1)
+                        <select disabled class="gk-select bg-gray-100 text-gray-500">
+                            <option value="draft">Draft</option>
+                        </select>
+                    @else
+                        <select wire:model.live="selectedStatus" class="gk-select">
+                            <option value="">Pilih status</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="potensi">Potensi</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                    @endif
                 </div>
             </div>
 

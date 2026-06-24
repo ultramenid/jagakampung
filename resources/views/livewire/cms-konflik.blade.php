@@ -358,6 +358,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                 const clrText = isAktif ? '#890620' : '#1d7a95';
                 const totalLamp = data?.data?.media?.lampiran?.length ?? 0;
                 const totalMedia = data?.data?.media?.gambar?.length ?? 0;
+                const totalArtikel = data?.data?.media?.artikel?.length ?? 0;
                 const badgeStyle = `background:${clrBg};color:${clrText};`;
                 const borderColor = isAktif ? '#890620' : '#348AA7';
 
@@ -419,6 +420,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                 style="border-color:${borderColor}"
                                 class="py-3 px-1 text-xs transition focus:outline-none cursor-pointer">
                             Artikel
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="${badgeStyle}">${totalMedia}</span>
                         </button>
                     </div>
 

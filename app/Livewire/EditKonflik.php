@@ -8,35 +8,52 @@ use Livewire\{Component, WithFileUploads};
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Masmerise\Toaster\Toaster;
 
-
 class EditKonflik extends Component
 {
     use WithFileUploads;
     public $deleter, $isAdd, $isEdit, $isPelaku;
-    public $chooseRegion = '';
-    public $region = 'Pilih desa';
-    public $administrasi = [], $lampirans = [], $images = [];
+    public $chooseRegion = "";
+    public $region = "Pilih desa";
+    public $administrasi = [],
+        $lampirans = [],
+        $images = [];
     public $selectedGroup, $selectedPerusahaan, $selectedStatus;
-    public $lembaga = '', $lembagas = [], $chooselembaga = '';
+    public $lembaga = "",
+        $lembagas = [],
+        $chooselembaga = "";
     public $namalampiran;
     public $filelampiran;
     public $editIndex = null;
     public $luas, $kk, $deskripsikonflik, $deskripsiperjuangan;
-    public $provinsi, $kabkota, $kecamatan, $desa, $latitude, $longtitude, $geom;
+    public $provinsi,
+        $kabkota,
+        $kecamatan,
+        $desa,
+        $latitude,
+        $longtitude,
+        $geom;
     public $idDB;
 
-    public function mount($idDB){
+    public function mount($idDB)
+    {
         // dd($idDB);
         $this->idDB = $idDB;
 
-        $data = DB::table('konflik')->select('konflik.*',
-            DB::raw('(SELECT JSON_ARRAYAGG(nama) FROM konflik_gambar WHERE konflik_gambar.konflik_id = konflik.id) as gambar'),
-            DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT("nama", nama, "file", file)) FROM konflik_lampiran WHERE konflik_lampiran.konflik_id = konflik.id) as lampiran'),
-            DB::raw('(SELECT JSON_ARRAYAGG(nama) FROM konflik_lembaga WHERE konflik_lembaga.konflik_id = konflik.id) as lembaga')
-        )
-        ->where('konflik.id', $idDB)
-        ->first();
-
+        $data = DB::table("konflik")
+            ->select(
+                "konflik.*",
+                DB::raw(
+                    "(SELECT JSON_ARRAYAGG(nama) FROM konflik_gambar WHERE konflik_gambar.konflik_id = konflik.id) as gambar",
+                ),
+                DB::raw(
+                    '(SELECT JSON_ARRAYAGG(JSON_OBJECT("nama", nama, "file", file)) FROM konflik_lampiran WHERE konflik_lampiran.konflik_id = konflik.id) as lampiran',
+                ),
+                DB::raw(
+                    "(SELECT JSON_ARRAYAGG(nama) FROM konflik_lembaga WHERE konflik_lembaga.konflik_id = konflik.id) as lembaga",
+                ),
+            )
+            ->where("konflik.id", $idDB)
+            ->first();
 
         // dd($data);
         // ponytail: IDOR guard — only the owner or an admin may edit this konflik
@@ -63,52 +80,51 @@ class EditKonflik extends Component
 
         $this->region = "{$this->provinsi} | {$this->kabkota} | {$this->kecamatan} | {$this->desa} ";
 
-
-        $geom = DB::connection('pgsql_gis')
-        ->table('proteus.mv_level_6_id')
-        // ->selectRaw('ST_AsGeoJSON(geom÷) as geom')
-        ->select('geom', 'name', 'latitude', 'longtitude')
-        ->where('name', 'ILIKE', '%' . $this->chooseRegion . '%')
-        ->first();
+        $geom = DB::connection("pgsql_gis")
+            ->table("proteus.mv_level_6_id")
+            // ->selectRaw('ST_AsGeoJSON(geom÷) as geom')
+            ->select("geom", "name", "latitude", "longtitude")
+            ->where("name", "ILIKE", "%" . $this->chooseRegion . "%")
+            ->first();
 
         $this->geom = $geom->geom;
-        $this->dispatch('connected', [
-            'latitude' => $this->latitude,
-            'longitude' => $this->longtitude,
-            'geom' => $this->geom,
+        $this->dispatch("connected", [
+            "latitude" => $this->latitude,
+            "longitude" => $this->longtitude,
+            "geom" => $this->geom,
         ]);
-
     }
 
-    public function manualValidation(){
+    public function manualValidation()
+    {
         // dd('masuk');
-        if($this->desa == ''){
+        if ($this->desa == "") {
             // dd('masuk');
-            Toaster::error('Silahkan pilih wilayah konflik!');
+            Toaster::error("Silahkan pilih wilayah konflik!");
             return false;
-        }elseif($this->latitude == '' || $this->longtitude == ''){
-            Toaster::error('Silahkan pilih titik koordinat konflik pada peta!');
+        } elseif ($this->latitude == "" || $this->longtitude == "") {
+            Toaster::error("Silahkan pilih titik koordinat konflik pada peta!");
             return false;
-        }elseif($this->luas == ''){
-            Toaster::error('Silahkan isi luas konflik!');
+        } elseif ($this->luas == "") {
+            Toaster::error("Silahkan isi luas konflik!");
             return false;
-        }elseif($this->kk == ''){
-            Toaster::error('Silahkan isi jumlah KK konflik!');
+        } elseif ($this->kk == "") {
+            Toaster::error("Silahkan isi jumlah KK konflik!");
             return false;
-        }elseif($this->selectedStatus == ''){
-            Toaster::error('Silahkan pilih status konflik!');
+        } elseif ($this->selectedStatus == "") {
+            Toaster::error("Silahkan pilih status konflik!");
             return false;
-        }elseif($this->deskripsikonflik == ''){
-            Toaster::error('Silahkan isi deskripsi konflik!');
+        } elseif ($this->deskripsikonflik == "") {
+            Toaster::error("Silahkan isi deskripsi konflik!");
             return false;
-        }elseif($this->deskripsiperjuangan == ''){
-            Toaster::error('Silahkan isi deskripsi perjuangan!');
+        } elseif ($this->deskripsiperjuangan == "") {
+            Toaster::error("Silahkan isi deskripsi perjuangan!");
             return false;
-        }elseif($this->selectedGroup == ''){
-            Toaster::error('Silahkan pilih group perusahaan!');
+        } elseif ($this->selectedGroup == "") {
+            Toaster::error("Silahkan pilih group perusahaan!");
             return false;
-        }elseif($this->selectedPerusahaan == ''){
-            Toaster::error('Silahkan pilih perusahaan!');
+        } elseif ($this->selectedPerusahaan == "") {
+            Toaster::error("Silahkan pilih perusahaan!");
             return false;
         }
 
@@ -133,30 +149,30 @@ class EditKonflik extends Component
 
         if($this->manualValidation()){
             // Simpan data konflik
-            $konflikId = DB::table('konflik')
-            ->where('id', $this->idDB)
-            ->update([
-                'provinsi' => $this->provinsi,
-                'kabkota' => $this->kabkota,
-                'kecamatan' => $this->kecamatan,
-                'desa' => $this->desa,
-                'lat' => $this->latitude,
-                'long' => $this->longtitude,
-                'luas' => $this->luas,
-                'group' => $this->selectedGroup,
-                'perusahaan' => $this->selectedPerusahaan,
-                'kk' => $this->kk,
-                'deskripsikonflik' => $this->deskripsikonflik,
-                'deskripsiperjuangan' => $this->deskripsiperjuangan,
-                'status' => $this->selectedStatus,
-                'updated_at' => Carbon::now('Asia/Jakarta'),
-            ]);
+            $konflikId = DB::table("konflik")
+                ->where("id", $this->idDB)
+                ->update([
+                    "provinsi" => $this->provinsi,
+                    "kabkota" => $this->kabkota,
+                    "kecamatan" => $this->kecamatan,
+                    "desa" => $this->desa,
+                    "lat" => $this->latitude,
+                    "long" => $this->longtitude,
+                    "luas" => $this->luas,
+                    "group" => $this->selectedGroup,
+                    "perusahaan" => $this->selectedPerusahaan,
+                    "kk" => $this->kk,
+                    "deskripsikonflik" => $this->deskripsikonflik,
+                    "deskripsiperjuangan" => $this->deskripsiperjuangan,
+                    "status" => $this->selectedStatus,
+                    "updated_at" => Carbon::now("Asia/Jakarta"),
+                ]);
 
             // update atau insert lembaga
             foreach ($this->lembagas as $lembaga) {
-                DB::table('konflik_lembaga')->updateOrInsert(
-                    ['konflik_id' => $this->idDB, 'nama' => $lembaga],
-                    ['updated_at' => Carbon::now('Asia/Jakarta')]
+                DB::table("konflik_lembaga")->updateOrInsert(
+                    ["konflik_id" => $this->idDB, "nama" => $lembaga],
+                    ["updated_at" => Carbon::now("Asia/Jakarta")],
                 );
             }
 
@@ -164,42 +180,48 @@ class EditKonflik extends Component
             $newFilenames = [];
 
             foreach ($this->lampirans as $lampiran) {
-                $isTemp = $lampiran['file'] instanceof TemporaryUploadedFile;
+                $isTemp = $lampiran["file"] instanceof TemporaryUploadedFile;
 
                 if ($isTemp) {
-                    $filenamelampiran = uniqid() . '_' .$lampiran['filename'];
-                    $lampiran['file']->storeAs('lampiran', $filenamelampiran, 'public');
+                    $filenamelampiran = uniqid() . "_" . $lampiran["filename"];
+                    $lampiran["file"]->storeAs(
+                        "lampiran",
+                        $filenamelampiran,
+                        "public",
+                    );
                 } else {
-                    $filenamelampiran = $lampiran['file'];
+                    $filenamelampiran = $lampiran["file"];
                 }
 
                 $newFilenames[] = $filenamelampiran;
 
-                DB::table('konflik_lampiran')->updateOrInsert(
-                    ['konflik_id' => $this->idDB, 'file' => $filenamelampiran],
+                DB::table("konflik_lampiran")->updateOrInsert(
+                    ["konflik_id" => $this->idDB, "file" => $filenamelampiran],
                     [
-                        'nama' => $lampiran['nama'],
-                        'file' => $filenamelampiran,
-                        'updated_at' => Carbon::now('Asia/Jakarta'),
-                    ]
+                        "nama" => $lampiran["nama"],
+                        "file" => $filenamelampiran,
+                        "updated_at" => Carbon::now("Asia/Jakarta"),
+                    ],
                 );
             }
 
             // hapus file lama yang tidak ada di $newFilenames
-            $oldLampirans = DB::table('konflik_lampiran')->where('konflik_id', $this->idDB)->pluck('file')->toArray();
+            $oldLampirans = DB::table("konflik_lampiran")
+                ->where("konflik_id", $this->idDB)
+                ->pluck("file")
+                ->toArray();
             $deletedLampirans = array_diff($oldLampirans, $newFilenames);
 
             foreach ($deletedLampirans as $deleted) {
-                Storage::disk('public')->delete('lampiran/' . $deleted);
-                DB::table('konflik_lampiran')->where('konflik_id', $this->idDB)->where('file', $deleted)->delete();
+                Storage::disk("public")->delete("lampiran/" . $deleted);
+                DB::table("konflik_lampiran")
+                    ->where("konflik_id", $this->idDB)
+                    ->where("file", $deleted)
+                    ->delete();
             }
 
-
-
-
-
-        //    save gambar
-           $allImages = array_merge($this->images, $this->newImages);
+            //    save gambar
+            $allImages = array_merge($this->images, $this->newImages);
 
             // kumpulkan semua filename yang akan disimpan
             $newFilenames = [];
@@ -208,8 +230,9 @@ class EditKonflik extends Component
                 $isTemp = $image instanceof TemporaryUploadedFile;
 
                 if ($isTemp) {
-                    $filenamegambar = uniqid() . '_' . $image->getClientOriginalName();
-                    $image->storeAs('gambar', $filenamegambar, 'public');
+                    $filenamegambar =
+                        uniqid() . "_" . $image->getClientOriginalName();
+                    $image->storeAs("gambar", $filenamegambar, "public");
                 } else {
                     $filenamegambar = $image;
                 }
@@ -218,52 +241,54 @@ class EditKonflik extends Component
             }
 
             // hapus file lama yang tidak ada di $newFilenames
-            $oldGambars = DB::table('konflik_gambar')->where('konflik_id', $this->idDB)->pluck('nama')->toArray();
+            $oldGambars = DB::table("konflik_gambar")
+                ->where("konflik_id", $this->idDB)
+                ->pluck("nama")
+                ->toArray();
             $deletedGambars = array_diff($oldGambars, $newFilenames);
 
             foreach ($deletedGambars as $deleted) {
-                Storage::disk('public')->delete('gambar/' . $deleted);
-                DB::table('konflik_gambar')->where('konflik_id', $this->idDB)->where('nama', $deleted)->delete();
-
+                Storage::disk("public")->delete("gambar/" . $deleted);
+                DB::table("konflik_gambar")
+                    ->where("konflik_id", $this->idDB)
+                    ->where("nama", $deleted)
+                    ->delete();
             }
 
             // update DB dengan semua filename (encode jadi JSON atau sesuai struktur tabel)
 
             // dd($newFilenames);
-           foreach ($newFilenames as $filename) {
-                DB::table('konflik_gambar')
-                    ->where('konflik_id', $this->idDB)
+            foreach ($newFilenames as $filename) {
+                DB::table("konflik_gambar")
+                    ->where("konflik_id", $this->idDB)
                     ->updateOrInsert(
-                        ['konflik_id' => $this->idDB, 'nama' => $filename],
+                        ["konflik_id" => $this->idDB, "nama" => $filename],
                         [
-                            'nama' => $filename,
-                            'updated_at' => Carbon::now('Asia/Jakarta'),
-                        ]
+                            "nama" => $filename,
+                            "updated_at" => Carbon::now("Asia/Jakarta"),
+                        ],
                     );
             }
-            redirect()->to('/cms/konflik');
+            redirect()->to("/cms/konflik");
         }
     }
 
     public function simpanLampiran()
     {
         $this->validate([
-            'namalampiran'  => 'required|string',
-            'filelampiran' => 'required|mimes:pdf,jpg,jpeg,png,webp',
+            "namalampiran" => "required|string",
+            "filelampiran" => "required|mimes:pdf,jpg,jpeg,png,webp",
         ]);
 
         $this->lampirans[] = [
-            'nama' => $this->namalampiran,
-            'file' => $this->filelampiran,
-            'filename' => $this->filelampiran->getClientOriginalName(),
-
+            "nama" => $this->namalampiran,
+            "file" => $this->filelampiran,
+            "filename" => $this->filelampiran->getClientOriginalName(),
         ];
 
         $this->resetForm();
         // dd($this->lampirans);
-        $this->dispatch('close-form');
-
-
+        $this->dispatch("close-form");
     }
 
     public $newImages = [];
@@ -285,7 +310,6 @@ class EditKonflik extends Component
         $this->isAdd = true;
     }
 
-
     public function updateLampiranTemp()
     {
         if ($this->editIndex === null) {
@@ -293,46 +317,43 @@ class EditKonflik extends Component
         }
 
         $this->validate([
-            'namalampiran'  => 'required|string',
-            'filelampiran' => 'nullable|mimes:pdf,jpg,jpeg,png,webp',
+            "namalampiran" => "required|string",
+            "filelampiran" => "nullable|mimes:pdf,jpg,jpeg,png,webp",
         ]);
 
-        $this->lampirans[$this->editIndex]['nama']
-            = $this->namalampiran;
+        $this->lampirans[$this->editIndex]["nama"] = $this->namalampiran;
 
         // kalau upload file baru → ganti
         if ($this->filelampiran) {
-            $this->lampirans[$this->editIndex]['file']
-                = $this->filelampiran;
+            $this->lampirans[$this->editIndex]["file"] = $this->filelampiran;
 
-            $this->lampirans[$this->editIndex]['filename']
-                = $this->filelampiran->getClientOriginalName();
+            $this->lampirans[$this->editIndex][
+                "filename"
+            ] = $this->filelampiran->getClientOriginalName();
         }
 
         // penting: reindex
         $this->lampirans = array_values($this->lampirans);
 
         $this->resetForm();
-        $this->dispatch('close-form');
-
+        $this->dispatch("close-form");
     }
 
     public function deleteTags($id)
     {
         unset($this->lembagas[$id]);
-        $this->lembaga = '';
-        empty($this->lembagas) ? $this->lembaga = 'Pilih lembaga' : null;
-        $this->chooselembaga = '';
+        $this->lembaga = "";
+        empty($this->lembagas) ? ($this->lembaga = "Pilih lembaga") : null;
+        $this->chooselembaga = "";
     }
 
-
-     public function resetForm()
+    public function resetForm()
     {
-        $this->namalampiran   = null;
-        $this->filelampiran  = null;
-        $this->isAdd         = false;
-        $this->isEdit        = false;
-        $this->editIndex     = null;
+        $this->namalampiran = null;
+        $this->filelampiran = null;
+        $this->isAdd = false;
+        $this->isEdit = false;
+        $this->editIndex = null;
 
         $this->resetValidation();
     }
@@ -345,11 +366,11 @@ class EditKonflik extends Component
         }
 
         $this->editIndex = $index;
-        $this->isEdit    = true;
-        $this->isAdd     = false;
+        $this->isEdit = true;
+        $this->isAdd = false;
 
         // dd($this->lampirans[$index]->nama);
-        $this->namalampiran = $this->lampirans[$index]['nama'];
+        $this->namalampiran = $this->lampirans[$index]["nama"];
 
         // file tidak bisa diprefill, biarkan kosong
         $this->filelampiran = null;
@@ -362,25 +383,25 @@ class EditKonflik extends Component
         $this->longtitude = $longtitude;
         $this->geom = $geom;
 
-        $this->dispatch('connected', [
-            'latitude' => (float) $latitude,
-            'longtitude' => (float) $longtitude,
-            'geom' => $geom,
+        $this->dispatch("connected", [
+            "latitude" => (float) $latitude,
+            "longtitude" => (float) $longtitude,
+            "geom" => $geom,
         ]);
-        $parts = preg_split('/[\[\]\|]+/', $value, -1, PREG_SPLIT_NO_EMPTY);
+        $parts = preg_split("/[\[\]\|]+/", $value, -1, PREG_SPLIT_NO_EMPTY);
 
         [
             $this->desa,
             $this->kecamatan,
             $this->kabkota,
-            $this->provinsi
+            $this->provinsi,
         ] = array_slice($parts, 0, 4) + [null, null, null, null];
 
         $this->region = "{$this->provinsi} | {$this->kabkota} | {$this->kecamatan} | {$this->desa} ";
-        $this->chooseRegion = '';
+        $this->chooseRegion = "";
         $this->administrasi = [];
 
-        $this->dispatch('close-region');
+        $this->dispatch("close-region");
     }
 
     public function delete($index)
@@ -401,11 +422,13 @@ class EditKonflik extends Component
             return;
         }
 
-        $this->administrasi = DB::connection('pgsql_gis')
-        ->table('proteus.mv_level_6_id')
-        ->selectRaw('ST_AsGeoJSON(geom) as geom, "NAME" as name, latitude, longtitude')
-        ->where('NAME', 'ILIKE', '%' . $this->chooseRegion . '%')
-        ->get();
+        $this->administrasi = DB::connection("pgsql_gis")
+            ->table("proteus.mv_level_6_id")
+            ->selectRaw(
+                'ST_AsGeoJSON(geom) as geom, "NAME" as name, latitude, longtitude',
+            )
+            ->where("NAME", "ILIKE", "%" . $this->chooseRegion . "%")
+            ->get();
     }
 
     public function removeImage($index)
@@ -415,20 +438,28 @@ class EditKonflik extends Component
         $this->images = array_values($this->images);
     }
 
-    public function getPerusahaan(){
-        return DB::table('perusahaans')->where('group', $this->selectedGroup)->get();
+    public function getPerusahaan()
+    {
+        return DB::table("perusahaans")
+            ->where("group", $this->selectedGroup)
+            ->get();
     }
-    public function getLembaga(){
-        return DB::table('instansi')->get();
+    public function getLembaga()
+    {
+        return DB::table("instansi")->get();
     }
-    public function getGroup(){
-        return DB::table('groups')->get();
+    public function getGroup()
+    {
+        return DB::table("groups")->get();
     }
     public function render()
     {
         $groups = $this->getGroup();
         $perusahaans = $this->getPerusahaan();
         $listlembaga = $this->getLembaga();
-        return view('livewire.edit-konflik', compact('groups', 'perusahaans', 'listlembaga'));
+        return view(
+            "livewire.edit-konflik",
+            compact("groups", "perusahaans", "listlembaga"),
+        );
     }
 }
