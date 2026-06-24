@@ -11,33 +11,32 @@
         Tambah Konflik
     </a>
 
-    {{-- Map Legend --}}
-    <div
+    <div role="group" aria-label="Legenda status konflik"
         class="fixed z-20 bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2.5 shadow-geist font-mono text-[11px] uppercase tracking-wider text-gray-600 select-none">
 
-        <button id="toggleAktif" class="legend-btn flex items-center gap-1.5 cursor-pointer">
-            <span class="w-3 h-3 rounded-full bg-[#890620] border-2 border-white shadow-sm inline-block"></span>
+        <button id="toggleAktif" aria-pressed="true" aria-label="Tampilkan titik Aktif" class="legend-btn flex items-center gap-1.5 cursor-pointer">
+            <span aria-hidden="true" class="w-3 h-3 rounded-full bg-status-aktif border-2 border-white shadow-sm inline-block"></span>
             Aktif
         </button>
 
-        <span class="w-px h-3 bg-gray-200"></span>
+        <span aria-hidden="true" class="w-px h-3 bg-gray-200"></span>
 
-        <button id="togglePotensi" class="legend-btn flex items-center gap-1.5 cursor-pointer">
-            <span class="w-3 h-3 rounded-full bg-white border-[3px] border-[#348AA7] shadow-sm inline-block"></span>
+        <button id="togglePotensi" aria-pressed="true" aria-label="Tampilkan titik Potensi" class="legend-btn flex items-center gap-1.5 cursor-pointer">
+            <span aria-hidden="true" class="w-3 h-3 rounded-full bg-white border-[3px] border-status-potensi shadow-sm inline-block"></span>
             Potensi
         </button>
 
-        <span class="w-px h-3 bg-gray-200"></span>
+        <span aria-hidden="true" class="w-px h-3 bg-gray-200"></span>
 
-        <button id="toggleDraft" class="legend-btn flex items-center gap-1.5 cursor-pointer">
-            <span class="w-3 h-3 rounded-full bg-white border-[3px] border-[#605B51] shadow-sm inline-block"></span>
+        <button id="toggleDraft" aria-pressed="true" aria-label="Tampilkan titik Draft" class="legend-btn flex items-center gap-1.5 cursor-pointer">
+            <span aria-hidden="true" class="w-3 h-3 rounded-full bg-white border-[3px] border-status-draft shadow-sm inline-block"></span>
             Draft
         </button>
 
     </div>
 
     {{-- Map --}}
-    <div class="w-full h-[89vh] z-10 rounded-md" id="map" wire:ignore></div>
+    <div role="application" aria-label="Peta konflik agraria" class="w-full h-[89vh] z-10 rounded-md" id="map" wire:ignore></div>
 
     {{-- Mobile backdrop --}}
     <div id="sidebarOverlay"
@@ -76,7 +75,7 @@
         </div>
 
         {{-- Sidebar Body --}}
-        <div id="sidebarContent" class="flex-1 overflow-y-auto">
+        <div id="sidebarContent" aria-live="polite" aria-busy="false" class="flex-1 overflow-y-auto">
             <div class="flex flex-col items-center justify-center h-full text-center px-8 pb-16">
                 <div
                     class="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center mb-4">
@@ -167,30 +166,30 @@
 
                             if (aktif > 0 && potensi > 0 && draft > 0) {
                                 html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
-                                    <div style="flex:1;background:#890620;"></div>
-                                    <div style="flex:1;background:#348AA7;"></div>
-                                    <div style="flex:1;background:#605B51;"></div>
+                                    <div style="flex:1;background:var(--color-status-aktif);"></div>
+                                    <div style="flex:1;background:var(--color-status-potensi);"></div>
+                                    <div style="flex:1;background:var(--color-status-draft);"></div>
                                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
                                 </div>`;
                             } else if (aktif > 0 && draft > 0) {
                                 html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
-                                    <div style="flex:1;background:#890620;"></div>
+                                    <div style="flex:1;background:var(--color-status-aktif);"></div>
                                     {{-- <div style="flex:1;background:#348AA7;"></div> --}}
-                                    <div style="flex:1;background:#605B51;"></div>
+                                    <div style="flex:1;background:var(--color-status-draft);"></div>
                                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
                                 </div>`;
                             }else if (aktif > 0 && potensi > 0) {
                                 html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
-                                    <div style="flex:1;background:#890620;"></div>
-                                    <div style="flex:1;background:#348AA7;"></div>
+                                    <div style="flex:1;background:var(--color-status-aktif);"></div>
+                                    <div style="flex:1;background:var(--color-status-potensi);"></div>
                                     {{-- <div style="flex:1;background:#605B51;"></div> --}}
                                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
                                 </div>`;
                             } else {
                                 html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
                                     {{-- <div style="flex:1;background:#890620;"></div> --}}
-                                    <div style="flex:1;background:#348AA7;"></div>
-                                    <div style="flex:1;background:#605B51;"></div>
+                                    <div style="flex:1;background:var(--color-status-potensi);"></div>
+                                    <div style="flex:1;background:var(--color-status-draft);"></div>
                                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
                                 </div>`;
                             }
@@ -209,21 +208,21 @@
                             iconSize: [20, 20],
                             iconAnchor: [10, 10],
                             popupAnchor: [0, -13],
-                            html: `<div style="width:20px;height:20px;border-radius:50%;background:#890620;border:2.5px solid white;box-shadow:0 1px 6px rgba(137,6,32,0.45);"></div>`
+                            html: `<div style="width:20px;height:20px;border-radius:50%;background:var(--color-status-aktif);border:2.5px solid white;box-shadow:0 1px 6px rgba(137,6,32,0.45);"></div>`
                         });
                         const iconPotensi = L.divIcon({
                             className: '',
                             iconSize: [20, 20],
                             iconAnchor: [10, 10],
                             popupAnchor: [0, -13],
-                            html: `<div style="width:20px;height:20px;border-radius:50%;background:white;border:3px solid #348AA7;box-shadow:0 1px 6px rgba(52,138,167,0.35);"></div>`
+                            html: `<div style="width:20px;height:20px;border-radius:50%;background:white;border:3px solid var(--color-status-potensi);box-shadow:0 1px 6px rgba(52,138,167,0.35);"></div>`
                         });
                         const iconDraft = L.divIcon({
                             className: '',
                             iconSize: [20, 20],
                             iconAnchor: [10, 10],
                             popupAnchor: [0, -13],
-                            html: `<div style="width:20px;height:20px;border-radius:50%;background:white;border:3px solid #605B51;box-shadow:0 1px 6px rgba(234, 179, 8, 0.35);"></div>`
+                            html: `<div style="width:20px;height:20px;border-radius:50%;background:white;border:3px solid var(--color-status-draft);box-shadow:0 1px 6px rgba(234, 179, 8, 0.35);"></div>`
                         });
 
                         // ── Loading skeleton ──────────────────────────────────────────────────
@@ -353,9 +352,9 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
             function renderSidebar(data) {
                 const status = data.data.atribut.status;
                 const colors = {
-                    aktif: { dot: '#890620', bg: '#fef2f2', text: '#890620' },
-                    potensi: { dot: '#348AA7', bg: '#eff8fb', text: '#1d7a95' },
-                    draft: { dot: '#605B51', bg: '#f5f5f0', text: '#605B51' },
+                    aktif: { dot: 'var(--color-status-aktif)', bg: '#fef2f2', text: 'var(--color-status-aktif)' },
+                    potensi: { dot: 'var(--color-status-potensi)', bg: '#eff8fb', text: '#1d7a95' },
+                    draft: { dot: 'var(--color-status-draft)', bg: '#f5f5f0', text: 'var(--color-status-draft)' },
                 };
                 const c = colors[status] ?? colors.draft;
                 const totalLamp = data?.data?.media?.lampiran?.length ?? 0;
@@ -376,7 +375,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                     ${status}
                                 </span>
                             </div>
-                            <p class="text-[11px] text-gray-400 truncate">${data.data.lokasi.provinsi} &mdash; ${data.data.lokasi.kabkota}</p>
+                            <p class="text-[11px] text-gray-400 truncate">${data.data.lokasi.provinsi}, ${data.data.lokasi.kabkota}</p>
                         </div>
                         <div class="flex-shrink-0 flex items-center gap-2">
                             <a href="${APP_URL}/cms/edit-konflik/${data.data.id}"
@@ -700,18 +699,21 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
 
             document.getElementById('toggleAktif').addEventListener('click', function() {
                 isAktifVisible = !isAktifVisible;
+                document.getElementById('toggleAktif').setAttribute('aria-pressed', String(isAktifVisible));
                 this.classList.toggle('opacity-40');
                 applyFilterStatus();
             });
 
             document.getElementById('togglePotensi').addEventListener('click', function() {
                 isPotensiVisible = !isPotensiVisible;
+                document.getElementById('togglePotensi').setAttribute('aria-pressed', String(isPotensiVisible));
                 this.classList.toggle('opacity-40');
                 applyFilterStatus();
             });
 
             document.getElementById('toggleDraft').addEventListener('click', function() {
             isDraftVisible = !isDraftVisible;
+            document.getElementById('toggleDraft').setAttribute('aria-pressed', String(isDraftVisible));
             this.classList.toggle('opacity-40');
             applyFilterStatus();
             });

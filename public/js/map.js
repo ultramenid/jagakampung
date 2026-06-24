@@ -56,7 +56,7 @@ window.focusKonflik = function (id, lat, lng) {
             sidebarContent.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-12 px-8 text-center">
                     <p class="text-sm font-medium text-gray-600">Gagal memuat data</p>
-                    <p class="text-xs text-gray-400 mt-1">ID: ${id} — ${err.message}</p>
+                    <p class="text-xs text-gray-400 mt-1">ID: ${id}, ${err.message}</p>
                 </div>`;
         });
 };
@@ -211,9 +211,9 @@ function renderLampiran(data) {
 function renderSidebar(data) {
     const status = data.data.atribut.status;
     const colors = {
-        aktif: { dot: "#890620", bg: "#fef2f2", text: "#890620" },
-        potensi: { dot: "#348AA7", bg: "#eff8fb", text: "#1d7a95" },
-        draft: { dot: "#605B51", bg: "#f5f5f0", text: "#605B51" },
+        aktif: { dot: "var(--color-status-aktif)", bg: "#fef2f2", text: "var(--color-status-aktif)" },
+        potensi: { dot: "var(--color-status-potensi)", bg: "#eff8fb", text: "#1d7a95" },
+        draft: { dot: "var(--color-status-draft)", bg: "#f5f5f0", text: "var(--color-status-draft)" },
     };
     const c = colors[status] ?? colors.draft;
     const totalLamp = data?.data?.media?.lampiran?.length ?? 0;
@@ -471,14 +471,14 @@ pruneCluster.BuildLeafletClusterIcon = function (cluster) {
 
     if (aktif > 0 && potensi > 0) {
         html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
-            <div style="flex:1;background:#890620;"></div>
-            <div style="flex:1;background:#348AA7;"></div>
+            <div style="flex:1;background:var(--color-status-aktif);"></div>
+            <div style="flex:1;background:var(--color-status-potensi);"></div>
             <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
         </div>`;
     } else if (aktif > 0) {
-        html = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#890620;color:white;display:flex;align-items:center;justify-content:center;font:bold 11px system-ui,sans-serif;box-shadow:0 2px 8px rgba(137,6,32,0.4);">${aktif}</div>`;
+        html = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--color-status-aktif);color:white;display:flex;align-items:center;justify-content:center;font:bold 11px system-ui,sans-serif;box-shadow:0 2px 8px rgba(137,6,32,0.4);">${aktif}</div>`;
     } else {
-        html = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#348AA7;color:white;display:flex;align-items:center;justify-content:center;font:bold 11px system-ui,sans-serif;box-shadow:0 2px 8px rgba(52,138,167,0.4);">${potensi}</div>`;
+        html = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--color-status-potensi);color:white;display:flex;align-items:center;justify-content:center;font:bold 11px system-ui,sans-serif;box-shadow:0 2px 8px rgba(52,138,167,0.4);">${potensi}</div>`;
     }
     return L.divIcon({
         className: "",
@@ -495,14 +495,14 @@ const iconAktif = L.divIcon({
     iconSize: [20, 20],
     iconAnchor: [10, 10],
     popupAnchor: [0, -13],
-    html: `<div style="width:20px;height:20px;border-radius:50%;background:#890620;border:2.5px solid white;box-shadow:0 1px 6px rgba(137,6,32,0.45);"></div>`,
+    html: `<div style="width:20px;height:20px;border-radius:50%;background:var(--color-status-aktif);border:2.5px solid white;box-shadow:0 1px 6px rgba(137,6,32,0.45);"></div>`,
 });
 const iconPotensi = L.divIcon({
     className: "",
     iconSize: [20, 20],
     iconAnchor: [10, 10],
     popupAnchor: [0, -13],
-    html: `<div style="width:20px;height:20px;border-radius:50%;background:white;border:3px solid #348AA7;box-shadow:0 1px 6px rgba(52,138,167,0.35);"></div>`,
+    html: `<div style="width:20px;height:20px;border-radius:50%;background:white;border:3px solid var(--color-status-potensi);box-shadow:0 1px 6px rgba(52,138,167,0.35);"></div>`,
 });
 
 // ── PRUNE CLUSTER: Custom single marker icon ──────────────────────────
@@ -574,7 +574,7 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
                             </svg>
                         </div>
                         <p class="text-sm font-medium text-gray-600">Gagal memuat data</p>
-                        <p class="text-xs text-gray-400 mt-1">ID: ${id} — ${err.message}</p>
+                        <p class="text-xs text-gray-400 mt-1">ID: ${id}, ${err.message}</p>
                     </div>
                 `;
             });
@@ -653,12 +653,14 @@ function applyFilterStatus() {
 
 document.getElementById("toggleAktif").addEventListener("click", function () {
     isAktifVisible = !isAktifVisible;
+    document.getElementById("toggleAktif").setAttribute("aria-pressed", String(isAktifVisible));
     this.classList.toggle("opacity-40");
     applyFilterStatus();
 });
 
 document.getElementById("togglePotensi").addEventListener("click", function () {
     isPotensiVisible = !isPotensiVisible;
+    document.getElementById("togglePotensi").setAttribute("aria-pressed", String(isPotensiVisible));
     this.classList.toggle("opacity-40");
     applyFilterStatus();
 });

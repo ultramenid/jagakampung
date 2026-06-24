@@ -16,16 +16,22 @@
         @endphp
         <aside class="w-80 h-screen flex flex-col border-r border-gray-200 bg-white">
 
-            {{-- Masthead --}}
-            <div class="flex-shrink-0 px-6 pt-6 pb-5">
-                <a href="#" class="text-xl font-semibold tracking-tight text-gray-900">
-                    Jagakampung<span class="font-mono text-gray-400">.id</span>
+            {{-- Masthead — same dark console chrome as the CMS + login --}}
+            <div class="flex-shrink-0 px-6 pt-6 pb-5 bg-[#0f0f0f] text-white" style="background-image: radial-gradient(140% 200% at 0% 0%, #1f1f1f 0%, #0f0f0f 62%);">
+                <a href="#" class="text-xl font-semibold tracking-tight text-white">
+                    Jagakampung<span class="font-mono text-gray-500">.id</span>
                 </a>
-                <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400">Peta Konflik Agraria</p>
+                <div class="mt-1.5 flex items-center gap-2">
+                    <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400">Peta Konflik Agraria</span>
+                    <span class="relative flex h-1.5 w-1.5" title="Pemantau aktif">
+                        <span class="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b8324a] opacity-60"></span>
+                        <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#b8324a]"></span>
+                    </span>
+                </div>
             </div>
 
             {{-- Caseload — the thesis: how big, how active --}}
-            <div class="flex-shrink-0 px-6 pb-6 border-b border-gray-100">
+            <div class="flex-shrink-0 px-6 pt-5 pb-6 border-b border-gray-100">
                 <div class="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider text-gray-400">
                     <span>Status Kasus</span>
                     <span class="tabular-nums">{{ $stats['total'] }} titik · {{ $stats['provinsi'] }} provinsi</span>
@@ -33,12 +39,12 @@
 
                 {{-- composition bar: segment widths = real aktif/potensi share --}}
                 <div class="mt-2.5 flex h-2 rounded-full overflow-hidden bg-gray-100">
-                    <div style="width: {{ $aktifPct }}%; background-color: #890620;"></div>
-                    <div style="width: {{ $potensiPct }}%; background-color: #348AA7;"></div>
+                    <div class="bg-status-aktif" style="width: {{ $aktifPct }}%;"></div>
+                    <div class="bg-status-potensi" style="width: {{ $potensiPct }}%;"></div>
                 </div>
                 <div class="mt-2.5 flex items-center gap-5 font-mono text-[11px] text-gray-500">
-                    <span><span class="tabular-nums font-semibold" style="color:#890620;">{{ $stats['aktif'] }}</span> Aktif</span>
-                    <span><span class="tabular-nums font-semibold" style="color:#348AA7;">{{ $stats['potensi'] }}</span> Potensi</span>
+                    <span><span class="tabular-nums font-semibold text-status-aktif">{{ $stats['aktif'] }}</span> Aktif</span>
+                    <span><span class="tabular-nums font-semibold text-status-potensi">{{ $stats['potensi'] }}</span> Potensi</span>
                 </div>
 
                 {{-- scale: land + people --}}
@@ -59,11 +65,11 @@
                 <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mb-2">Layers</p>
                 <div class="flex flex-col">
                     @foreach ($layers as $l)
-                        <label class="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-md hover:bg-gray-50 transition cursor-pointer select-none">
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-md hover:bg-gray-50 has-[:focus-visible]:bg-gray-50 transition cursor-pointer select-none">
                             <span class="flex-1 text-[13px] text-gray-700">{{ __($l['name']) }}</span>
                             <span class="relative flex flex-shrink-0">
                                 <input type="checkbox" id="{{ $l['id'] }}" class="peer sr-only" @checked($l['checked'])>
-                                <span class="block h-4 w-7 rounded-full bg-gray-200 peer-checked:bg-accent-500 transition-colors"></span>
+                                <span class="block h-4 w-7 rounded-full bg-gray-200 peer-checked:bg-accent-500 peer-focus-visible:ring-2 peer-focus-visible:ring-accent-500/40 transition-colors"></span>
                                 <span class="absolute w-2.5 h-2.5 bg-white rounded-full left-[3px] top-[3px] peer-checked:translate-x-full transition"></span>
                             </span>
                         </label>
@@ -79,19 +85,17 @@
                 </div>
                 <div class="flex-1 overflow-y-auto px-3 pb-4">
                     @forelse ($konfliks as $k)
+                        @php $isAktif = $k->status === 'aktif'; @endphp
                         <button type="button"
                             onclick="focusKonflik({{ $k->id }}, {{ $k->lat }}, {{ $k->long }})"
-                            class="w-full text-left flex gap-3 pl-2.5 pr-3 py-2.5 rounded-md hover:bg-gray-50 transition group">
-                            {{-- status ledger rule --}}
-                            <span class="w-[3px] self-stretch rounded-full flex-shrink-0"
-                                  style="background-color: {{ $k->status === 'aktif' ? '#890620' : '#348AA7' }};"></span>
+                            class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 transition group">
+                            <span aria-hidden="true" class="w-2 h-2 rounded-full flex-shrink-0 {{ $isAktif ? 'bg-status-aktif' : 'bg-status-potensi' }}"></span>
                             <span class="min-w-0 flex-1">
                                 <span class="flex items-baseline justify-between gap-2">
                                     <span class="text-[13px] font-medium text-gray-900 truncate group-hover:text-gray-950">
                                         {{ $k->desa ?: $k->kecamatan ?: $k->kabkota ?: 'Tanpa nama' }}
                                     </span>
-                                    <span class="font-mono text-[9px] uppercase tracking-wider flex-shrink-0"
-                                          style="color: {{ $k->status === 'aktif' ? '#890620' : '#348AA7' }};">{{ $k->status }}</span>
+                                    <span class="font-mono text-[9px] uppercase tracking-wider flex-shrink-0 {{ $isAktif ? 'text-status-aktif' : 'text-status-potensi' }}">{{ $k->status }}</span>
                                 </span>
                                 <span class="block text-[11px] text-gray-400 truncate">{{ $k->kabkota }}{{ $k->provinsi ? ', '.$k->provinsi : '' }}</span>
                                 <span class="block mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
@@ -111,21 +115,21 @@
             </div>
         </aside>
 
-        <div id="map" class="flex-1 h-screen"></div>
+        <div id="map" role="application" aria-label="Peta konflik agraria" class="flex-1 h-screen"></div>
 
         {{-- Map Legend --}}
-        <div
+        <div role="group" aria-label="Legenda status konflik"
             class="fixed bottom-8 left-[calc(50%+10rem)] -translate-x-1/2 flex z-[9999] items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2.5 shadow-geist font-mono text-[11px] uppercase tracking-wider text-gray-600 select-none">
 
-            <button id="toggleAktif" class="legend-btn flex items-center gap-1.5 cursor-pointer">
-                <span class="w-3 h-3 rounded-full bg-[#890620] border-2 border-white shadow-sm inline-block"></span>
+            <button id="toggleAktif" aria-pressed="true" aria-label="Tampilkan titik Aktif" class="legend-btn flex items-center gap-1.5 cursor-pointer rounded-full px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40">
+                <span aria-hidden="true" class="w-3 h-3 rounded-full bg-status-aktif border-2 border-white shadow-sm inline-block"></span>
                 Aktif
             </button>
 
-            <span class="w-px h-3 bg-gray-200"></span>
+            <span aria-hidden="true" class="w-px h-3 bg-gray-200"></span>
 
-            <button id="togglePotensi" class="legend-btn flex items-center gap-1.5 cursor-pointer">
-                <span class="w-3 h-3 rounded-full bg-white border-[3px] border-[#348AA7] shadow-sm inline-block"></span>
+            <button id="togglePotensi" aria-pressed="true" aria-label="Tampilkan titik Potensi" class="legend-btn flex items-center gap-1.5 cursor-pointer rounded-full px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40">
+                <span aria-hidden="true" class="w-3 h-3 rounded-full bg-white border-[3px] border-status-potensi shadow-sm inline-block"></span>
                 Potensi
             </button>
         </div>
@@ -162,7 +166,7 @@
             </div>
 
             {{-- Sidebar Body --}}
-            <div id="sidebarContent" class="flex-1 overflow-y-auto">
+            <div id="sidebarContent" aria-live="polite" aria-busy="false" class="flex-1 overflow-y-auto">
                 <div class="flex flex-col items-center justify-center h-full text-center px-8 pb-16">
                     <div class="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

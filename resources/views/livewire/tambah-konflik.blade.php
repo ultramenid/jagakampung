@@ -54,8 +54,8 @@
                             class="absolute z-[500] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-geist overflow-hidden">
                             <div class="p-2 border-b border-gray-100">
                                 <div class="relative">
-                                    <input x-ref="regionInput" wire:model.live.debounce.200ms="chooseRegion" type="text"
-                                        class="gk-input h-9 pr-9" placeholder="Cari nama desa…" />
+                                    <input x-ref="regionInput" id="tk-region" wire:model.live.debounce.200ms="chooseRegion" type="text"
+                                            class="gk-input h-9 pr-9" placeholder="Cari nama desa…" />
                                     <div wire:loading wire:target="chooseRegion" class="absolute right-3 top-1/2 -translate-y-1/2">
                                         <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -95,14 +95,14 @@
                     </div>
 
                     {{-- Lat & Long --}}
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="gk-label">Latitude</label>
-                            <input placeholder="Dipilih dari peta" disabled type="text" wire:model="latitude" class="gk-input gk-mono bg-gray-50 text-gray-500" />
+                            <label for="tk-latitude" class="gk-label">Latitude</label>
+                            <input id="tk-latitude" placeholder="Dipilih dari peta" disabled type="text" wire:model="latitude" class="gk-input gk-mono bg-gray-50 text-gray-500" />
                         </div>
                         <div>
-                            <label class="gk-label">Longitude</label>
-                            <input placeholder="Dipilih dari peta" disabled type="text" wire:model="longtitude" class="gk-input gk-mono bg-gray-50 text-gray-500" />
+                            <label for="tk-longitude" class="gk-label">Longitude</label>
+                            <input id="tk-longitude" placeholder="Dipilih dari peta" disabled type="text" wire:model="longtitude" class="gk-input gk-mono bg-gray-50 text-gray-500" />
                         </div>
                     </div>
 
@@ -122,8 +122,8 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="gk-label">Group Perusahaan</label>
-                            <select wire:model.live="selectedGroup" class="gk-select">
+                            <label for="tk-group" class="gk-label">Group Perusahaan</label>
+                            <select id="tk-group" wire:model.live="selectedGroup" class="gk-select">
                                 <option value="">Pilih group</option>
                                 @foreach ($groups as $grp)
                                     <option value="{{ $grp->nama }}">{{ $grp->nama }}</option>
@@ -131,8 +131,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="gk-label">Perusahaan</label>
-                            <select wire:model="selectedPerusahaan" class="gk-select {{ !$selectedGroup ? 'opacity-50' : '' }}">
+                            <label for="tk-perusahaan" class="gk-label">Perusahaan</label>
+                            <select id="tk-perusahaan" wire:model="selectedPerusahaan" class="gk-select {{ !$selectedGroup ? 'opacity-50' : '' }}">
                                 <option value="">{{ $selectedGroup ? 'Pilih perusahaan' : 'Pilih group dulu' }}</option>
                                 @foreach ($perusahaans as $perusahaan)
                                     <option value="{{ $perusahaan->perusahaan }}">{{ $perusahaan->perusahaan }}</option>
@@ -141,23 +141,23 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label class="gk-label">Luas <span class="text-gray-400 font-normal normal-case">(ha)</span></label>
-                            <input placeholder="0.00" type="number" wire:model="luas" class="gk-input gk-mono" />
+                            <label for="tk-luas" class="gk-label">Luas <span class="text-gray-400 font-normal normal-case">(ha)</span></label>
+                            <input id="tk-luas" placeholder="0.00" type="number" wire:model="luas" class="gk-input gk-mono" />
                         </div>
                         <div>
-                            <label class="gk-label">Jumlah KK</label>
-                            <input placeholder="0" type="number" wire:model="kk" class="gk-input gk-mono" />
+                            <label for="tk-kk" class="gk-label">Jumlah KK</label>
+                            <input id="tk-kk" placeholder="0" type="number" wire:model="kk" class="gk-input gk-mono" />
                         </div>
                         <div>
-                            <label class="gk-label">Status</label>
+                            <label for="tk-status" class="gk-label">Status</label>
                             @if (session('role_id') === 1)
-                                <select disabled class="gk-select bg-gray-100 text-gray-500">
+                                <select id="tk-status" disabled class="gk-select bg-gray-100 text-gray-500">
                                     <option value="draft">Draft</option>
                                 </select>
                             @else
-                                <select wire:model.live="selectedStatus" class="gk-select">
+                                <select id="tk-status" wire:model.live="selectedStatus" class="gk-select">
                                     <option value="">Pilih status</option>
                                     <option value="aktif">Aktif</option>
                                     <option value="potensi">Potensi</option>
@@ -216,12 +216,12 @@
                 </div>
                 <div class="p-6 space-y-5">
                     <div>
-                        <label class="gk-label">Deskripsi Konflik</label>
-                        <textarea wire:model="deskripsikonflik" rows="6" placeholder="Jelaskan latar belakang dan kronologi konflik…" class="gk-input h-auto py-2.5 resize-none"></textarea>
+                        <label for="tk-deskripsi-konflik" class="gk-label">Deskripsi Konflik</label>
+                        <textarea id="tk-deskripsi-konflik" wire:model="deskripsikonflik" rows="6" placeholder="Jelaskan latar belakang dan kronologi konflik…" class="gk-input h-auto py-2.5 resize-none"></textarea>
                     </div>
                     <div>
-                        <label class="gk-label">Deskripsi Perjuangan</label>
-                        <textarea wire:model="deskripsiperjuangan" rows="6" placeholder="Jelaskan upaya perjuangan yang telah dilakukan…" class="gk-input h-auto py-2.5 resize-none"></textarea>
+                        <label for="tk-deskripsi-perjuangan" class="gk-label">Deskripsi Perjuangan</label>
+                        <textarea id="tk-deskripsi-perjuangan" wire:model="deskripsiperjuangan" rows="6" placeholder="Jelaskan upaya perjuangan yang telah dilakukan…" class="gk-input h-auto py-2.5 resize-none"></textarea>
                     </div>
                 </div>
             </div>

@@ -1,24 +1,25 @@
 @extends('layouts.dashboardLayout')
 
 @section('content')
-<div class="bg-white">
+<div class="bg-white shadow-sm">
     @include('partials.header')
     @include('partials.nav')
 </div>
 
 @php
     $statusMeta = [
-        'aktif'   => ['label' => 'Aktif',   'dot' => '#890620', 'text' => 'text-[#890620]', 'bg' => 'bg-[#890620]/8'],
-        'potensi' => ['label' => 'Potensi', 'dot' => '#348AA7', 'text' => 'text-[#348AA7]', 'bg' => 'bg-[#348AA7]/8'],
-        'draft'   => ['label' => 'Draft',   'dot' => '#605B51', 'text' => 'text-[#605B51]', 'bg' => 'bg-[#605B51]/8'],
+        'aktif'   => ['label' => 'Aktif',   'dot' => 'bg-status-aktif',   'text' => 'text-status-aktif',   'bar' => 'bg-status-aktif'],
+        'potensi' => ['label' => 'Potensi', 'dot' => 'bg-status-potensi', 'text' => 'text-status-potensi', 'bar' => 'bg-status-potensi'],
+        'draft'   => ['label' => 'Draft',   'dot' => 'bg-status-draft',   'text' => 'text-status-draft',   'bar' => 'bg-status-draft'],
     ];
     $fmt = fn ($n) => number_format($n, 0, '.', ',');
+    $caseTotal = max(1, array_sum(array_map(fn ($k) => (int) ($byStatus[$k] ?? 0), array_keys($statusMeta))));
 @endphp
 
 <div class="max-w-3xl px-4 mx-auto py-10">
 
     {{-- Hero: the tally is the thesis --}}
-    <div class="mb-10">
+    <div class="mb-8">
         <p class="font-mono text-[11px] uppercase tracking-widest text-gray-400 mb-3">Konflik Agraria Terpantau</p>
         <div class="flex items-end gap-4">
             <span class="font-mono text-6xl font-semibold text-gray-900 tabular-nums leading-none">
@@ -32,17 +33,26 @@
         </div>
     </div>
 
-    {{-- Status breakdown --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
-        @foreach ($statusMeta as $key => $meta)
-            <div class="gk-card p-4">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="w-2 h-2 rounded-full" style="background: {{ $meta['dot'] }}"></span>
+    {{-- Caseload composition — one ledger bar, segments sized by status --}}
+    <div class="gk-card p-4 mb-10">
+        <p class="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-3">Komposisi caseload</p>
+        <div class="flex h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
+            @foreach ($statusMeta as $key => $meta)
+                @php $w = round(($byStatus[$key] ?? 0) / $caseTotal * 100, 2); @endphp
+                @if ($w > 0)
+                    <div class="{{ $meta['bar'] }} h-full" style="width: {{ $w }}%" title="{{ $meta['label'] }}"></div>
+                @endif
+            @endforeach
+        </div>
+        <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
+            @foreach ($statusMeta as $key => $meta)
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full {{ $meta['dot'] }}"></span>
                     <span class="font-mono text-[10px] uppercase tracking-wider {{ $meta['text'] }}">{{ $meta['label'] }}</span>
+                    <span class="gk-mono text-sm font-semibold text-gray-900">{{ $fmt($byStatus[$key] ?? 0) }}</span>
                 </div>
-                <span class="gk-mono text-3xl font-semibold text-gray-900">{{ $fmt($byStatus[$key] ?? 0) }}</span>
-            </div>
-        @endforeach
+            @endforeach
+        </div>
     </div>
 
     {{-- Registry counts --}}
@@ -60,29 +70,36 @@
         @endforeach
     </div>
 
-    {{-- Recent cases --}}
+    {{-- Recent cases — the ledger --}}
     <div>
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-sm font-semibold text-gray-900">Kasus Terbaru</h2>
             <a href="{{ url('/cms/konflik') }}" class="text-xs text-accent-500 hover:text-accent-600 font-medium">Lihat peta →</a>
         </div>
-        <div class="gk-card divide-y divide-gray-100">
-            @forelse ($recent as $row)
-                @php $m = $statusMeta[$row->status] ?? ['label' => $row->status, 'text' => 'text-gray-500', 'bg' => 'bg-gray-100', 'dot' => '#a3a3a3']; @endphp
-                <a href="{{ url('/cms/edit-konflik/' . $row->id) }}" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                    <span class="gk-mono text-xs text-gray-300 w-8 shrink-0">#{{ $row->id }}</span>
-                    <div class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ $row->desa }}, {{ $row->kabkota }}</p>
-                        <p class="text-xs text-gray-400 truncate">{{ $row->provinsi }}</p>
+        <div class="gk-card overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-2 border-b border-gray-100 font-mono text-[10px] uppercase tracking-widest text-gray-400">
+                <span>Kode · Lokasi</span><span>Status</span>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @forelse ($recent as $row)
+                    @php $m = $statusMeta[$row->status] ?? ['label' => $row->status, 'text' => 'text-gray-500', 'dot' => 'bg-gray-400']; @endphp
+                    <a href="{{ url('/cms/edit-konflik/' . $row->id) }}" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <span class="gk-mono text-xs text-gray-300 w-10 shrink-0">#{{ $row->id }}</span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ $row->desa }}, {{ $row->kabkota }}</p>
+                            <p class="text-xs text-gray-400 truncate">{{ $row->provinsi }}</p>
+                        </div>
+                        <span class="flex items-center gap-2 shrink-0 font-mono text-[10px] uppercase tracking-wider {{ $m['text'] }}">
+                            <span class="w-1.5 h-1.5 rounded-full {{ $m['dot'] }}"></span>{{ $m['label'] }}
+                        </span>
+                    </a>
+                @empty
+                    <div class="px-4 py-12 text-center">
+                        <p class="text-sm text-gray-500">Belum ada data konflik.</p>
+                        <a href="{{ url('/cms/tambah-konflik') }}" class="gk-btn-primary gk-btn-sm mt-3 inline-flex">Tambah konflik</a>
                     </div>
-                    <span class="gk-badge {{ $m['bg'] }} {{ $m['text'] }} shrink-0">{{ $m['label'] }}</span>
-                </a>
-            @empty
-                <div class="px-4 py-12 text-center">
-                    <p class="text-sm text-gray-500">Belum ada data konflik.</p>
-                    <a href="{{ url('/cms/tambah-konflik') }}" class="gk-btn-primary gk-btn-sm mt-3 inline-flex">Tambah konflik</a>
-                </div>
-            @endforelse
+                @endforelse
+            </div>
         </div>
     </div>
 

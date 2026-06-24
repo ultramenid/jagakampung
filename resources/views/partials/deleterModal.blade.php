@@ -1,10 +1,14 @@
 <div>
     @if ($deleter)
-    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+         x-data="{ open: @entangle('deleter') }"
+         @keydown.escape.window="open = false">
 
-        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click="open = false"></div>
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" @click="open = false"></div>
 
-        <div class="relative bg-white rounded-xl shadow-geist w-full max-w-sm p-6 z-10">
+        <div role="dialog" aria-modal="true" aria-labelledby="deleterDialogTitle"
+             class="relative bg-white rounded-xl shadow-geist w-full max-w-sm p-6 z-10"
+             x-init="$nextTick(() => { $refs.deleterCancel && $refs.deleterCancel.focus() })">
             <div class="flex flex-col items-center text-center gap-3">
                 <div class="w-11 h-11 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
@@ -12,13 +16,13 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-900">Hapus data</h3>
+                    <h3 id="deleterDialogTitle" class="text-sm font-semibold text-gray-900">Hapus data</h3>
                     <p class="text-xs text-gray-500 mt-1">Hapus <span class="font-medium text-gray-900">{{ $deleteName }}</span>? Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
             </div>
 
             <div class="flex gap-3 mt-6">
-                <button wire:loading.remove wire:target="closeDelete" wire:click='closeDelete' type="button" class="gk-btn-secondary gk-btn-sm flex-1">Batal</button>
+                <button x-ref="deleterCancel" wire:loading.remove wire:target="closeDelete" wire:click='closeDelete' type="button" class="gk-btn-secondary gk-btn-sm flex-1">Batal</button>
                 <button wire:loading wire:target="closeDelete" type="button" class="gk-btn-secondary gk-btn-sm flex-1" disabled>Batal</button>
 
                 <button wire:loading.remove wire:target="deleting({{ $deleteID }})" wire:click="deleting({{ $deleteID }})" type="button"

@@ -1,4 +1,4 @@
-<div class="border-b border-gray-200 bg-white z-10">
+<div class="bg-[#0f0f0f] border-t border-white/5 z-10">
     <div class="max-w-3xl mx-auto sm:px-0 px-4">
         <nav class="flex items-center gap-1 overflow-x-auto scrollbar-hide">
 
@@ -16,9 +16,9 @@
                 }
                 $links[] = ['key' => 'settings', 'href' => '#', 'label' => 'Settings'];
 
-                $navBase = 'relative flex-shrink-0 px-3 py-3.5 text-sm font-medium transition-colors';
-                $navActive = 'text-gray-900 after:absolute after:-bottom-px after:left-0 after:right-0 after:h-0.5 after:bg-gray-900';
-                $navIdle = 'text-gray-400 hover:text-gray-900';
+                $navBase = 'relative flex-shrink-0 px-3 py-3 font-mono text-[11px] uppercase tracking-widest transition-colors';
+                $navActive = 'text-white after:absolute after:-bottom-px after:left-3 after:right-3 after:h-0.5 after:bg-[#b8324a]';
+                $navIdle = 'text-gray-500 hover:text-gray-200 focus-visible:outline-none focus-visible:text-white focus-visible:ring-2 focus-visible:ring-[#b8324a]/40 rounded-sm';
             @endphp
 
             @foreach ($links as $link)
