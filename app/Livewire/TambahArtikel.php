@@ -29,6 +29,17 @@ class TambahArtikel extends Component
     // simpan ke database 
     public function storeDatabase()
     {
+        // ponytail: validate image upload (only image mimes allowed)
+        $this->validate([
+            'gambar' => 'required|image|mimes:jpg,jpeg,png,webp',
+        ]);
+
+        // ponytail: only attach articles to a konflik you own (or admin)
+        $konflik = DB::table('konflik')->where('id', $this->konflik_id)->first();
+        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+            abort(403, 'Anda tidak berhak menambah artikel ke konflik ini.');
+        }
+
         // // ambil konfilik_id
         // $konflik = DB::table('konflik')->where('id', $this->konflik_id)->first();
         // if(!$konflik){

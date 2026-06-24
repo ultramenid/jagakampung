@@ -24,6 +24,7 @@ class LoginComponent extends Component
 
          //log in logic
          if($this->getDatauser() and Hash::check($this->password, $this->getDatauser()->password ) and $this->email == $this->getDatauser()->email) {
+            session()->regenerate(); // ponytail: rotate SID on auth to prevent session fixation (CWE-384)
             session([
                 'id' => $this->getDatauser()->id,
                 'role_id'=> $this->getDatauser()->role,

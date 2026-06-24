@@ -6,9 +6,81 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/* ── Geist design system (vercel.com/design) ───────────────────────────
+   Fonts loaded in <head> (Geist Sans + Geist Mono via Google Fonts).
+   Gray is overridden to a true-neutral ramp so the whole app shifts to
+   Geist's neutral palette; gray-900 (#171717) is Geist's primary ink. */
 @theme {
-    --font-sans: 'Open Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Menlo', monospace;
+
+    /* true-neutral ramp (Geist gray) */
+    --color-gray-50: #fafafa;
+    --color-gray-100: #f5f5f5;
+    --color-gray-200: #e5e5e5;
+    --color-gray-300: #d4d4d4;
+    --color-gray-400: #a3a3a3;
+    --color-gray-500: #737373;
+    --color-gray-600: #525252;
+    --color-gray-700: #404040;
+    --color-gray-800: #262626;
+    --color-gray-900: #171717;
+    --color-gray-950: #0a0a0a;
+
+    /* Geist blue (tertiary #006bff) */
+    --color-accent-50: #f0f6ff;
+    --color-accent-100: #e0eeff;
+    --color-accent-200: #b8d8ff;
+    --color-accent-300: #7db4ff;
+    --color-accent-400: #3b8fff;
+    --color-accent-500: #006bff;
+    --color-accent-600: #0058d6;
+    --color-accent-700: #0046a8;
+
+    /* Geist elevation */
+    --shadow-geist-sm: 0 2px 2px rgba(0, 0, 0, 0.04);
+    --shadow-geist:
+        0 1px 1px rgba(0, 0, 0, 0.02), 0 4px 8px -4px rgba(0, 0, 0, 0.04), 0 16px 24px -8px rgba(0, 0, 0, 0.06);
+}
+
+/* Component utilities (registered via @utility so they compose with @apply) */
+
+/* Buttons (6px radius, 40px control height, Geist weights) */
+@utility gk-btn {
+    @apply inline-flex items-center justify-center gap-1.5 h-10 px-3.5 rounded-md
+           text-sm font-medium transition-colors cursor-pointer select-none
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2;
+}
+@utility gk-btn-sm { @apply h-8 px-3 text-xs gap-1; }
+@utility gk-btn-primary   { @apply gk-btn bg-gray-900 text-white hover:bg-gray-700; }
+@utility gk-btn-secondary { @apply gk-btn bg-white text-gray-700 border border-gray-200 hover:bg-gray-50; }
+@utility gk-btn-accent    { @apply gk-btn bg-accent-500 text-white hover:bg-accent-600; }
+@utility gk-btn-danger    { @apply gk-btn bg-white text-red-600 border border-red-200 hover:bg-red-50; }
+
+/* Inputs */
+@utility gk-input {
+    @apply w-full h-10 px-3 rounded-md border border-gray-200 bg-white text-sm text-gray-900
+           placeholder:text-gray-400 transition-colors
+           focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20;
+}
+@utility gk-select { @apply gk-input pr-8; }
+@utility gk-label  { @apply block text-xs font-medium text-gray-600 mb-1.5; }
+@utility gk-error  { @apply mt-1 text-xs text-red-600; }
+
+/* Surfaces */
+@utility gk-card { @apply bg-white rounded-md border border-gray-200 shadow-geist-sm; }
+
+/* Badges — data taxonomy rendered in mono (the signature) */
+@utility gk-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full font-mono text-[10px]
+           font-medium uppercase tracking-wider;
+}
+@utility gk-mono { @apply font-mono tabular-nums; }
+
+[x-cloak] {
+    display: none !important;
 }
 
 .selection-bg ::selection {

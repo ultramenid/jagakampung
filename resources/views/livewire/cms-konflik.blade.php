@@ -2,7 +2,7 @@
 
     {{-- Floating Add Button --}}
     <a href="{{ url('/cms/tambah-konflik') }}"
-        class="fixed z-30 bottom-8 right-8 group flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold pl-4 pr-5 py-3 rounded-full shadow-lg transition-all duration-200 cursor-pointer select-none">
+        class="fixed z-30 bottom-8 right-8 group flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium pl-4 pr-5 py-3 rounded-full shadow-geist transition-colors duration-200 cursor-pointer select-none">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
                 d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -13,7 +13,7 @@
 
     {{-- Map Legend --}}
     <div
-        class="fixed z-20 bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2.5 shadow-md text-xs text-gray-600 select-none">
+        class="fixed z-20 bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2.5 shadow-geist font-mono text-[11px] uppercase tracking-wider text-gray-600 select-none">
 
         <button id="toggleAktif" class="legend-btn flex items-center gap-1.5 cursor-pointer">
             <span class="w-3 h-3 rounded-full bg-[#890620] border-2 border-white shadow-sm inline-block"></span>
@@ -37,7 +37,7 @@
     </div>
 
     {{-- Map --}}
-    <div class="w-full h-[89vh] z-10 rounded" id="map" wire:ignore></div>
+    <div class="w-full h-[89vh] z-10 rounded-md" id="map" wire:ignore></div>
 
     {{-- Mobile backdrop --}}
     <div id="sidebarOverlay"
@@ -47,12 +47,12 @@
 
     {{-- Sidebar --}}
     <div id="sidebar" style="transform: translateX(100%);"
-        class="fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-white shadow-2xl z-40 transition-transform duration-300 ease-in-out flex flex-col">
+        class="fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-white shadow-geist z-40 transition-transform duration-300 ease-in-out flex flex-col">
 
         {{-- Sidebar Header --}}
         <div class="flex-shrink-0 px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center flex-shrink-0">
+                <div class="w-8 h-8 rounded-md bg-gray-900 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 20 20"
                         fill="currentColor">
                         <path fill-rule="evenodd"
@@ -61,12 +61,12 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="font-bold text-sm text-gray-900 leading-tight">Detail Konflik</h2>
-                    <p class="text-[10px] text-gray-400">Klik marker untuk melihat detail</p>
+                    <h2 class="font-semibold text-sm text-gray-900 leading-tight">Detail Konflik</h2>
+                    <p class="text-[11px] text-gray-400">Klik marker untuk melihat detail</p>
                 </div>
             </div>
             <button onclick="closeSidebar()"
-                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition cursor-pointer">
+                class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                         d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -79,7 +79,7 @@
         <div id="sidebarContent" class="flex-1 overflow-y-auto">
             <div class="flex flex-col items-center justify-center h-full text-center px-8 pb-16">
                 <div
-                    class="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
+                    class="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-300" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -88,7 +88,7 @@
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
-                <p class="text-sm font-medium text-gray-500">Pilih titik di peta</p>
+                <p class="text-sm font-medium text-gray-700">Pilih titik di peta</p>
                 <p class="text-xs text-gray-400 mt-1">Detail konflik akan muncul di sini</p>
             </div>
         </div>
@@ -101,6 +101,7 @@
             document.addEventListener("DOMContentLoaded", () => {
 
                         var APP_URL = window.location.origin;
+                        const CSRF = '{{ csrf_token() }}';
                         var pruneCluster = new PruneClusterForLeaflet();
                         var markersPotensi = [];
                         var markersAktif = [];
@@ -126,6 +127,21 @@
                             sidebar.style.transform = 'translateX(100%)';
                             overlay.style.opacity = '0';
                             overlay.style.pointerEvents = 'none';
+                        };
+
+                        window.deleteKonflik = function(id) {
+                            if (!confirm('Hapus data konflik ini? Tindakan ini tidak dapat dibatalkan.')) return;
+                            fetch(`${APP_URL}/cms/konflik/${id}/delete`, {
+                                method: 'POST',
+                                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
+                            })
+                            .then(res => res.json().then(body => ({ ok: res.ok, body })))
+                            .then(({ ok, body }) => {
+                                if (!ok) throw new Error(body.message || 'Gagal menghapus data');
+                                closeSidebar();
+                                location.reload();
+                            })
+                            .catch(err => alert(err.message || 'Gagal menghapus data'));
                         };
 
                         // ── Map ───────────────────────────────────────────────────────────────
@@ -360,13 +376,22 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                             </div>
                             <p class="text-[11px] text-gray-400 truncate">${data.data.lokasi.provinsi} &mdash; ${data.data.lokasi.kabkota}</p>
                         </div>
-                        <a href="${APP_URL}/cms/edit-konflik/${data.data.id}"
-                           class="flex-shrink-0 inline-flex items-center gap-1.5 text-[11px] font-medium border border-gray-200 hover:border-gray-700 hover:text-gray-900 text-gray-500 px-3 py-1.5 rounded-lg transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                            </svg>
-                            Edit
-                        </a>
+                        <div class="flex-shrink-0 flex items-center gap-2">
+                            <a href="${APP_URL}/cms/edit-konflik/${data.data.id}"
+                               class="inline-flex items-center gap-1.5 text-[11px] font-medium border border-gray-200 hover:border-gray-700 hover:text-gray-900 text-gray-500 px-3 py-1.5 rounded-md transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                </svg>
+                                Edit
+                            </a>
+                            <button type="button" onclick="deleteKonflik(${data.data.id})"
+                               class="inline-flex items-center gap-1.5 text-[11px] font-medium border border-red-200 text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-md transition-colors cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                Hapus
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex gap-0 border-b border-gray-100 bg-gray-50/60 px-5">

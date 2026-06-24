@@ -12,6 +12,9 @@ class EditUser extends Component
     public $idUser, $name, $email, $password, $role, $instansi;
 
     public function mount($idDB){
+        if ((int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         $this->idUser = $idDB;
         $user = DB::table('users')->where('id', $this->idUser)->first();
         $this->name = $user->name;

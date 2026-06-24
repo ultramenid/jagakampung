@@ -8,6 +8,13 @@
 
     <title>{{ $title ?? 'Page Title' }}</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/thumbnail.png') }}">
+
+    {{-- Geist typeface (Vercel design system) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @livewireStyles
@@ -30,7 +37,7 @@
     <script src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 </head>
-<body class="font-sans  bg-gray-100 dark:bg-newgray-900 relative selection-bg ">
+<body class="font-sans bg-gray-50 text-gray-900 relative selection-bg antialiased">
     @yield('content')
 
     <x-toaster-hub />

@@ -28,7 +28,7 @@ class LocalServiceController extends Controller
                             'status' => $value['status'],
                             'lat' => (float)$value['lat'],
                             'long' => (float)$value['long'],
-                            'user_id' => $value['user_id']
+                            'user_id' => $value['user_id'],
                         ),
                     );
             };
@@ -59,6 +59,11 @@ class LocalServiceController extends Controller
         )
         ->where('konflik.id', $id)
         ->first();
+
+        if (! $data) {
+            return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => [

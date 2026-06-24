@@ -22,6 +22,9 @@ class EditGroup extends Component
 
 
     public function storeDatabase(){
+        if ((int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         if($this->manualValidation()){
            DB::transaction(function () {
                 $namaLama = DB::table('groups')->where('id', $this->idGroup)->value('nama');

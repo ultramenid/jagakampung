@@ -39,6 +39,14 @@ class CmsUsers extends Component
         $this->deleter = true;
     }
     public function deleting($id){
+        if ((int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
+        if ((int) $id === (int) session('id')) {
+            Toaster::error('Tidak dapat menghapus akun sendiri.');
+            $this->closeDelete();
+            return;
+        }
         DB::table('users')->where('id', $id)->delete();
 
         $message = 'Berhasil menghapus user ' . $this->deleteName;

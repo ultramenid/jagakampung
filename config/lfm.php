@@ -115,7 +115,7 @@ return [
     // When creating folder or renaming folder/file, automatically convert to alphanumeric instead of error
     'convert_to_alphanumeric'  => false,
 
-    'should_validate_size'     => false,
+    'should_validate_size'     => true,
 
     'should_validate_mime'     => true,
 
@@ -125,10 +125,10 @@ return [
     'over_write_on_duplicate'  => false,
 
     // mimetypes of executables to prevent from uploading
-    'disallowed_mimetypes' => ['text/x-php', 'text/html', 'text/plain'],
+    'disallowed_mimetypes' => ['text/x-php', 'text/html', 'text/plain', 'image/svg+xml', 'application/javascript', 'application/x-httpd-php'],
 
     // extensions of executables to prevent from uploading
-    'disallowed_extensions' => ['php', 'html'],
+    'disallowed_extensions' => ['php', 'phtml', 'phar', 'pht', 'phps', 'php3', 'php4', 'php5', 'php7', 'html', 'htm', 'shtml', 'svg', 'htaccess', 'js', 'cgi', 'pl', 'py', 'asp', 'aspx'],
 
     // Item Columns
     'item_columns' => ['name', 'url', 'time', 'icon', 'is_file', 'is_image', 'thumb_url'],

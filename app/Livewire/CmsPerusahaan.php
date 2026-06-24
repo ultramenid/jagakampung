@@ -42,6 +42,9 @@ class CmsPerusahaan extends Component
         $this->deleter = true;
     }
     public function deleting($id){
+        if ((int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         DB::table('perusahaans')->where('id', $id)->delete();
 
         $message = 'Berhasil menghapus group ' . $this->deleteName;

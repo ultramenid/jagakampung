@@ -21,12 +21,15 @@ class TambahUser extends Component
     }
 
     public function storeDatabase(){
+        if ((int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         if($this->manualValidation()){
             DB::table('users')->insert([
                 'name' => $this->nama,
                 'email' => $this->email,
                 'instansi' => $this->instansi,
-                'role' => $this->role,
+                'role' => in_array($this->role, ['0', '1'], true) ? (int) $this->role : 1, // ponytail: whitelist role, default to User
                 'is_active' => 1,
                 'password' => Hash::make($this->password),
                 'created_at' => Carbon::now('Asia/Jakarta'),

@@ -24,6 +24,15 @@ class EditArtikel extends Component
     {
         $this->artikel_id = $id;
         $data = DB::table('artikel')->where('id', $this->artikel_id)->first();
+        if (! $data) {
+            abort(404);
+        }
+
+        // ponytail: only the konflik's owner (or admin) may edit its articles
+        $konflik = DB::table('konflik')->where('id', $data->konflik_id)->first();
+        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+            abort(403, 'Anda tidak berhak mengedit artikel ini.');
+        }
 
         $this->konflik_id = $data->konflik_id;
         $this->judul_id = $data->judul_id;
@@ -38,6 +47,18 @@ class EditArtikel extends Component
 
     public function storeDatabase()
     {
+        // ponytail: validate only when a new file is uploaded (gambar may be a stored path string)
+        if ($this->gambar instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+            $this->validate(['gambar' => 'image|mimes:jpg,jpeg,png,webp']);
+        }
+
+        // ponytail: re-check ownership on every save (artikel_id is client-mutable)
+        $artikel = DB::table('artikel')->where('id', $this->artikel_id)->first();
+        $konflik = $artikel ? DB::table('konflik')->where('id', $artikel->konflik_id)->first() : null;
+        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+            abort(403, 'Anda tidak berhak mengedit artikel ini.');
+        }
+
         if($this->manualValidation()) {
             DB::transaction(function () {
                 $judulLama = DB::table('artikel')->where('id', $this->artikel_id)->value('judul_id');
@@ -74,6 +95,11 @@ class EditArtikel extends Component
     // delete artikel
     public function deleteArtikel()
     {
+        $artikel = DB::table('artikel')->where('id', $this->artikel_id)->first();
+        $konflik = $artikel ? DB::table('konflik')->where('id', $artikel->konflik_id)->first() : null;
+        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+            abort(403, 'Anda tidak berhak menghapus artikel ini.');
+        }
         DB::table('artikel')->where('id', $this->artikel_id)->delete();
         redirect()->to('/cms/konflik');
     }

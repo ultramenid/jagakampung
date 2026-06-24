@@ -129,6 +129,11 @@ class TambahKonflik extends Component
             $this->selectedStatus = 'draft';
         }
 
+        // ponytail: validate image uploads (no mimes rule existed before)
+        $this->validate([
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+        ]);
+
         if ($this->manualValidation()) {
             // Simpan data konflik
             // dd(Auth::id(), Auth::user());
