@@ -104,7 +104,7 @@ class TambahArtikel extends Component
             Toaster::error('Tanggal publish harus diisi!');
             return;
         }elseif($this->checkNamaExists()){
-            Toaster::error('Nama group sudah ada!');
+            Toaster::error('Judul artikel sudah ada!');
             return;
         }
         return true;

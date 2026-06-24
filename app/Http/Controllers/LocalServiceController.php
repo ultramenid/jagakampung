@@ -49,6 +49,8 @@ class LocalServiceController extends Controller
                             "judul_en", judul_en,
                             "slug", slug,
                             "gambar", gambar,
+                            "deskripsi_id", deskripsi_id,
+                            "deskripsi_en", deskripsi_en,
                             "tanggal_publish", tanggal_publish,
                             "sumber", sumber
                         )

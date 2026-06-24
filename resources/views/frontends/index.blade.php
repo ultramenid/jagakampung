@@ -20,7 +20,7 @@
             <div class="flex-shrink-0 px-6 py-5 border-b border-gray-100">
                 <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mb-3">Layers</p>
                 <div class="flex flex-col">
-                    <x-checkbox idAttr="adminkabkota" layerName="administrative_boundaries">
+                    <x-checkbox idAttr="adminkabkota" layerName="administrative_boundaries" checked>
                         {{ __('Titik Konflik') }}
                     </x-checkbox>
                     <x-checkbox idAttr="kawasanhutan" layerName="konsesi">
