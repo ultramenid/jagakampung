@@ -15,7 +15,7 @@ class EditUser extends Component
         $this->name = $user->name;
         $this->instansi = $user->instansi;
         $this->email = $user->email;
-        $this->role = $user->role_id;
+        $this->role = $user->role;
 
     }
 

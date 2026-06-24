@@ -45,6 +45,7 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1.5">Role</label>
                     <select wire:model="role"
                             class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 bg-white">
+                        <option value="">-- Pilih Role --</option>
                         <option value="0">Administrator</option>
                         <option value="1">User</option>
                     </select>

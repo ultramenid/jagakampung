@@ -26,7 +26,7 @@ class LoginComponent extends Component
          if($this->getDatauser() and Hash::check($this->password, $this->getDatauser()->password ) and $this->email == $this->getDatauser()->email) {
             session([
                 'id' => $this->getDatauser()->id,
-                'role_id'=> $this->getDatauser()->role_id,
+                'role_id'=> $this->getDatauser()->role,
                 'name' => $this->getDatauser()->name,
                 'email' => $this->getDatauser()->email,
                 'yearAlert' => 'all'

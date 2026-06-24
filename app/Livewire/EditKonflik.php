@@ -2,13 +2,11 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\{DB, Storage};
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Livewire\Component;
-use Livewire\WithFileUploads;
-use Masmerise\Toaster\Toaster;
+use Livewire\{Component, WithFileUploads};
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Masmerise\Toaster\Toaster;
 
 
 class EditKonflik extends Component
@@ -64,8 +62,9 @@ class EditKonflik extends Component
 
         $geom = DB::connection('pgsql_gis')
         ->table('proteus.mv_level_6_id')
-        ->selectRaw('ST_AsGeoJSON(geom) as geom')
-        ->where('NAME', 'ILIKE', '%' . $this->chooseRegion . '%')
+        // ->selectRaw('ST_AsGeoJSON(geom÷) as geom')
+        ->select('geom', 'name', 'latitude', 'longtitude')
+        ->where('name', 'ILIKE', '%' . $this->chooseRegion . '%')
         ->first();
 
         $this->geom = $geom->geom;

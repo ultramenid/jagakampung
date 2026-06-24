@@ -1,17 +1,8 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GrupController;
-use App\Http\Controllers\IndexController;
-use App\Http\Controllers\InstansiController;
-use App\Http\Controllers\KonflikController;
-use App\Http\Controllers\LocalServiceController;
-use App\Http\Controllers\PerusahaanController;
-use App\Http\Controllers\UsersController;
-use App\Http\Middleware\checkSession;
-use App\Http\Middleware\hasSession;
-use App\Http\Middleware\setLanguage;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{ArtikelController, DashboardController, GrupController, IndexController, InstansiController, KonflikController, LocalServiceController, PerusahaanController, UsersController};
+use App\Http\Middleware\{checkSession, hasSession, setLanguage};
 
 
 Route::redirect('/', 'en');
@@ -26,6 +17,9 @@ Route::middleware([setLanguage::class])->group(function () {
 
     Route::get('/cms/rest-map', [LocalServiceController::class, 'index']);
     Route::get('/cms/rest-map/{id}', [LocalServiceController::class, 'kasusDetail']);
+    
+    Route::get('rest-map', [LocalServiceController::class, 'index']);
+    Route::get('rest-map/{id}', [LocalServiceController::class, 'kasusDetail']);
 
 //redirect to login page if user has no session
 Route::middleware([checkSession::class])->group(function () {
@@ -47,6 +41,9 @@ Route::middleware([checkSession::class])->group(function () {
     Route::get('/cms/konflik', [KonflikController::class, 'index']);
     Route::get('/cms/users', [UsersController::class, 'index']);
     Route::get('/cms/instansi', [InstansiController::class, 'index']);
+
+    Route::get('/cms/tambah-artikel/{id}', [ArtikelController::class, 'add']);
+    Route::get('/cms/edit-artikel/{id}', [ArtikelController::class, 'edit']);
 
 
 

@@ -26,7 +26,7 @@ class TambahUser extends Component
                 'name' => $this->nama,
                 'email' => $this->email,
                 'instansi' => $this->instansi,
-                'role_id' => $this->role,
+                'role' => $this->role,
                 'is_active' => 1,
                 'password' => Hash::make($this->password),
                 'created_at' => Carbon::now('Asia/Jakarta'),

@@ -37,7 +37,7 @@
                     <td class="px-4 py-3 font-medium text-gray-900">{{ $user->name }}</td>
                     <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
                     <td class="px-4 py-3">
-                        @if ($user->role_id == 0)
+                        @if ($user->role == 0)
                             <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-900 text-white">Admin</span>
                         @else
                             <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">User</span>

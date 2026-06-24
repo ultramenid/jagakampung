@@ -3,68 +3,138 @@
 namespace App\Livewire;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Livewire\Component;
-use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
 use Masmerise\Toaster\Toaster;
 
 class TambahKonflik extends Component
 {
     use WithFileUploads;
-    public $deleter, $isAdd, $isEdit, $isPelaku;
+
+    public $deleter;
+
+    public $isAdd;
+
+    public $isEdit;
+
+    public $isPelaku;
+
     public $chooseRegion = '';
+
     public $region = 'Pilih desa';
-    public $administrasi = [], $lampirans = [], $images = [];
-    public $selectedGroup, $selectedPerusahaan, $selectedStatus;
-    public $lembaga = 'Pilih lembaga', $lembagas = [], $chooselembaga = '';
+
+    public $administrasi = [];
+
+    public $lampirans = [];
+
+    public $images = [];
+
+    public $selectedGroup;
+
+    public $selectedPerusahaan;
+
+    public $selectedStatus;
+
+    public $lembaga = 'Pilih lembaga';
+
+    public $lembagas = [];
+
+    public $chooselembaga = '';
+
     public $namalampiran;
+
     public $filelampiran;
+
     public $editIndex = null;
-    public $luas, $kk, $deskripsikonflik, $deskripsiperjuangan;
-    public $provinsi, $kabkota, $kecamatan, $desa, $latitude, $longtitude, $geom;
+
+    public $luas;
+
+    public $kk;
+
+    public $deskripsikonflik;
+
+    public $deskripsiperjuangan;
+
+    public $provinsi;
+
+    public $kabkota;
+
+    public $kecamatan;
+
+    public $desa;
+
+    public $latitude;
+
+    public $longtitude;
+
+    public $geom;
+
     public $searchPage = 1;
+
     public $searchHasMore = false;
 
-    public function manualValidation(){
+    public function manualValidation()
+    {
         // dd('masuk');
-        if($this->desa == ''){
+        if ($this->desa == '') {
             // dd('masuk');
             Toaster::error('Silahkan pilih wilayah konflik!');
+
             return false;
-        }elseif($this->latitude == '' || $this->longtitude == ''){
+        } elseif ($this->latitude == '' || $this->longtitude == '') {
             Toaster::error('Silahkan pilih titik koordinat konflik pada peta!');
+
             return false;
-        }elseif($this->luas == ''){
+        } elseif ($this->luas == '') {
             Toaster::error('Silahkan isi luas konflik!');
+
             return false;
-        }elseif($this->kk == ''){
+        } elseif ($this->kk == '') {
             Toaster::error('Silahkan isi jumlah KK konflik!');
+
             return false;
-        }elseif($this->selectedStatus == ''){
+        } elseif ($this->selectedStatus == '') {
             Toaster::error('Silahkan pilih status konflik!');
+
             return false;
-        }elseif($this->deskripsikonflik == ''){
+        } elseif ($this->deskripsikonflik == '') {
             Toaster::error('Silahkan isi deskripsi konflik!');
+
             return false;
-        }elseif($this->deskripsiperjuangan == ''){
+        } elseif ($this->deskripsiperjuangan == '') {
             Toaster::error('Silahkan isi deskripsi perjuangan!');
+
             return false;
-        }elseif($this->selectedGroup == ''){
+        } elseif ($this->selectedGroup == '') {
             Toaster::error('Silahkan pilih group perusahaan!');
+
             return false;
-        }elseif($this->selectedPerusahaan == ''){
+        } elseif ($this->selectedPerusahaan == '') {
             Toaster::error('Silahkan pilih perusahaan!');
+
             return false;
         }
 
         return true;
     }
 
-    public function storeDatabase(){
-        if($this->manualValidation()){
+    public function storeDatabase()
+    {
+        // dd(session()->all());
+
+        // kalo role nya user default ke draft
+        if (session('role_id') === 1) {
+            $this->selectedStatus = 'draft';
+        }
+
+        if ($this->manualValidation()) {
             // Simpan data konflik
+            // dd(Auth::id(), Auth::user());
+            // $status = $this->selectedStatus;
+            // dd($status);
+
             $konflikId = DB::table('konflik')->insertGetId([
                 'provinsi' => $this->provinsi,
                 'kabkota' => $this->kabkota,
@@ -79,7 +149,8 @@ class TambahKonflik extends Component
                 'status' => $this->selectedStatus,
                 'deskripsikonflik' => $this->deskripsikonflik,
                 'deskripsiperjuangan' => $this->deskripsiperjuangan,
-                'created_at' =>  Carbon::now('Asia/Jakarta'),
+                'user_id' => session('id'),
+                'created_at' => Carbon::now('Asia/Jakarta'),
             ]);
 
             // Simpan data lembaga terkait konflik
@@ -94,8 +165,8 @@ class TambahKonflik extends Component
             // Simpan data lampiran terkait konflik
             foreach ($this->lampirans as $lampiran) {
 
-                $filenamelampiran = uniqid() . '_' .$lampiran['filename'];
-                $pathLampiran = $lampiran['file']->storeAs( 'lampiran', $filenamelampiran,'public');
+                $filenamelampiran = uniqid().'_'.$lampiran['filename'];
+                $pathLampiran = $lampiran['file']->storeAs('lampiran', $filenamelampiran, 'public');
 
                 DB::table('konflik_lampiran')->insert([
                     'konflik_id' => $konflikId,
@@ -105,11 +176,10 @@ class TambahKonflik extends Component
                 ]);
             }
 
-
             // simpan data image terkait konflik
             foreach ($this->images as $image) {
-                $filenamegambar = uniqid() . '_' .$image->getClientOriginalName();
-                $pathGambar = $image->storeAs( 'gambar', $filenamegambar,'public');
+                $filenamegambar = uniqid().'_'.$image->getClientOriginalName();
+                $pathGambar = $image->storeAs('gambar', $filenamegambar, 'public');
 
                 DB::table('konflik_gambar')->insert([
                     'konflik_id' => $konflikId,
@@ -121,14 +191,14 @@ class TambahKonflik extends Component
             redirect()->to('/cms/konflik');
         }
 
-
-
     }
+
     // toggle form
     public function addLampiran()
     {
         if ($this->isAdd || $this->isEdit) {
             $this->resetForm();
+
             return;
         }
 
@@ -137,11 +207,11 @@ class TambahKonflik extends Component
 
     public function resetForm()
     {
-        $this->namalampiran   = null;
-        $this->filelampiran  = null;
-        $this->isAdd         = false;
-        $this->isEdit        = false;
-        $this->editIndex     = null;
+        $this->namalampiran = null;
+        $this->filelampiran = null;
+        $this->isAdd = false;
+        $this->isEdit = false;
+        $this->editIndex = null;
 
         $this->resetValidation();
     }
@@ -156,7 +226,7 @@ class TambahKonflik extends Component
     public function simpanLampiran()
     {
         $this->validate([
-            'namalampiran'  => 'required|string',
+            'namalampiran' => 'required|string',
             'filelampiran' => 'required|mimes:pdf,jpg,jpeg,png,webp',
         ]);
 
@@ -171,18 +241,17 @@ class TambahKonflik extends Component
         // dd($this->lampirans);
         $this->dispatch('close-form');
 
-
     }
 
     public function editPerkembangan($index)
     {
-        if (!isset($this->lampirans[$index])) {
+        if (! isset($this->lampirans[$index])) {
             return;
         }
 
         $this->editIndex = $index;
-        $this->isEdit    = true;
-        $this->isAdd     = false;
+        $this->isEdit = true;
+        $this->isAdd = false;
 
         $this->namalampiran = $this->lampirans[$index]['nama'];
 
@@ -197,7 +266,7 @@ class TambahKonflik extends Component
         }
 
         $this->validate([
-            'namalampiran'  => 'required|string',
+            'namalampiran' => 'required|string',
             'filelampiran' => 'nullable|mimes:pdf,jpg,jpeg,png,webp',
         ]);
 
@@ -233,16 +302,16 @@ class TambahKonflik extends Component
         }
     }
 
-     public function setLembaga($lembaga)
+    public function setLembaga($lembaga)
     {
-        if (!in_array($lembaga, $this->lembagas)) {
+        if (! in_array($lembaga, $this->lembagas)) {
             array_push($this->lembagas, $lembaga);
         }
         $this->chooselembaga = $lembaga;
         $this->lembaga = '';
     }
 
-     public function deleteTags($id)
+    public function deleteTags($id)
     {
         unset($this->lembagas[$id]);
         $this->lembaga = '';
@@ -250,24 +319,24 @@ class TambahKonflik extends Component
         $this->chooselembaga = '';
     }
 
-
     public function updatedChooseRegion()
     {
         if (strlen($this->chooseRegion) < 3) {
             $this->administrasi = [];
             $this->searchPage = 1;
             $this->searchHasMore = false;
+
             return;
         }
 
         $this->searchPage = 1;
         $results = DB::connection('pgsql_gis')
-        ->table('proteus.mv_level_6_id')
-        ->select('geom', 'name', 'latitude', 'longtitude')
-        ->where('name', 'ILIKE', '%' . $this->chooseRegion . '%')
-        ->skip(0)
-        ->take(5)
-        ->get();
+            ->table('proteus.mv_level_6_id')
+            ->select('geom', 'name', 'latitude', 'longtitude')
+            ->where('name', 'ILIKE', '%'.$this->chooseRegion.'%')
+            ->skip(0)
+            ->take(5)
+            ->get();
 
         $this->administrasi = $results;
         $this->searchHasMore = $results->count() === 5;
@@ -275,39 +344,42 @@ class TambahKonflik extends Component
 
     public function loadMoreResults()
     {
-        if (!$this->searchHasMore || strlen($this->chooseRegion) < 3) {
+        if (! $this->searchHasMore || strlen($this->chooseRegion) < 3) {
             return;
         }
 
         $offset = $this->searchPage * 5;
         $moreResults = DB::connection('pgsql_gis')
-        ->table('proteus.mv_level_6_id')
-        ->select('geom', 'name', 'latitude', 'longtitude')
-        ->where('name', 'ILIKE', '%' . $this->chooseRegion . '%')
-        ->skip($offset)
-        ->take(5)
-        ->get();
+            ->table('proteus.mv_level_6_id')
+            ->select('geom', 'name', 'latitude', 'longtitude')
+            ->where('name', 'ILIKE', '%'.$this->chooseRegion.'%')
+            ->skip($offset)
+            ->take(5)
+            ->get();
 
         $this->administrasi = collect($this->administrasi)->concat($moreResults);
         $this->searchPage++;
         $this->searchHasMore = $moreResults->count() === 5;
     }
 
-
-    public function getLembaga(){
+    public function getLembaga()
+    {
         return DB::table('instansi')->get();
     }
-    public function getGroup(){
+
+    public function getGroup()
+    {
         return DB::table('groups')->get();
     }
 
-    public function getPerusahaan(){
+    public function getPerusahaan()
+    {
         return DB::table('perusahaans')->where('group', $this->selectedGroup)->get();
     }
 
     public function addSelected($value)
     {
-        if (!in_array($value, $this->selected, true)) {
+        if (! in_array($value, $this->selected, true)) {
             $this->selected[] = $value;
         }
     }
@@ -317,7 +389,6 @@ class TambahKonflik extends Component
         unset($this->selected[$index]);
         $this->selected[] = array_values($this->selected);
     }
-
 
     public function selectRegion($value, $latitude, $longtitude, $geom)
     {
@@ -347,12 +418,12 @@ class TambahKonflik extends Component
         $this->dispatch('close-region');
     }
 
-
     public function render()
     {
         $groups = $this->getGroup();
         $perusahaans = $this->getPerusahaan();
         $listlembaga = $this->getLembaga();
+
         return view('livewire.tambah-konflik', compact('groups', 'perusahaans', 'listlembaga'));
     }
 }
