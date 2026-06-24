@@ -133,12 +133,20 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
-                    <select wire:model.live="selectedStatus"
-                        class="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 cursor-pointer transition-colors">
-                        <option value="">Pilih status</option>
-                        <option value="aktif"> Aktif</option>
-                        <option value="potensi"> Potensi</option>
-                    </select>
+                    @if (session('role_id') === 1)
+                        <select disabled
+                            class="w-full bg-gray-100 border border-gray-300 rounded-xl py-2.5 px-4 text-sm text-gray-500">
+                            <option value="draft">Draft</option>
+                        </select>
+                    @else
+                        <select wire:model.live="selectedStatus"
+                            class="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-4 text-sm text-gray-700">
+                            <option value="">Pilih status</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="potensi">Potensi</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                    @endif
                 </div>
             </div>
 
