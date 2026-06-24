@@ -4,89 +4,110 @@
 @section('content')
     <div class="sm:flex hidden" x-data="{ legend: true }">
 
-        {{-- Left rail --}}
+        {{-- Left rail — field dossier of land under dispute --}}
+        @php
+            $aktifPct = $stats['total'] ? round($stats['aktif'] / $stats['total'] * 100) : 0;
+            $potensiPct = $stats['total'] ? 100 - $aktifPct : 0;
+            $layers = [
+                ['id' => 'adminkabkota', 'name' => 'Titik Konflik', 'checked' => true],
+                ['id' => 'kawasanhutan', 'name' => 'Kawasan Hutan', 'checked' => false],
+                ['id' => 'pbph', 'name' => 'Konsesi PBPH', 'checked' => false],
+            ];
+        @endphp
         <aside class="w-80 h-screen flex flex-col border-r border-gray-200 bg-white">
 
-            {{-- Brand --}}
-            <div class="flex-shrink-0 px-6 py-5 border-b border-gray-100">
+            {{-- Masthead --}}
+            <div class="flex-shrink-0 px-6 pt-6 pb-5">
                 <a href="#" class="text-xl font-semibold tracking-tight text-gray-900">
                     Jagakampung<span class="font-mono text-gray-400">.id</span>
                 </a>
-                <p class="mt-1 font-mono text-[10px] uppercase tracking-widest text-gray-400">Peta Konflik Agraria</p>
+                <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400">Peta Konflik Agraria</p>
             </div>
 
-
-            {{-- Layers --}}
-            <div class="flex-shrink-0 px-6 py-5 border-b border-gray-100">
-                <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mb-3">Layers</p>
-                <div class="flex flex-col">
-                    <x-checkbox idAttr="adminkabkota" layerName="administrative_boundaries" checked>
-                        {{ __('Titik Konflik') }}
-                    </x-checkbox>
-                    <x-checkbox idAttr="kawasanhutan" layerName="konsesi">
-                        {{ __('Kawasan Hutan') }}
-                    </x-checkbox>
-                    <x-checkbox idAttr="pbph" layerName="konsesi">
-                        {{ __('Konsesi PBPH') }}
-                    </x-checkbox>
+            {{-- Caseload — the thesis: how big, how active --}}
+            <div class="flex-shrink-0 px-6 pb-6 border-b border-gray-100">
+                <div class="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider text-gray-400">
+                    <span>Status Kasus</span>
+                    <span class="tabular-nums">{{ $stats['total'] }} titik · {{ $stats['provinsi'] }} provinsi</span>
                 </div>
-            </div>
 
-            {{-- Summary --}}
-            <div class="flex-shrink-0 px-6 py-5 border-b border-gray-100">
-                <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mb-3">Ringkasan</p>
-                <div class="grid grid-cols-2 gap-px bg-gray-100 rounded-md overflow-hidden border border-gray-100">
-                    <div class="bg-white px-3 py-3">
-                        <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none">{{ $stats['total'] }}</p>
-                        <p class="mt-1.5 text-[11px] text-gray-400">Titik konflik</p>
-                    </div>
-                    <div class="bg-white px-3 py-3">
-                        <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none">{{ $stats['provinsi'] }}</p>
-                        <p class="mt-1.5 text-[11px] text-gray-400">Provinsi</p>
-                    </div>
-                    <div class="bg-white px-3 py-3">
-                        <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none">{{ round($stats['luas'] / 1000) }}</p>
+                {{-- composition bar: segment widths = real aktif/potensi share --}}
+                <div class="mt-2.5 flex h-2 rounded-full overflow-hidden bg-gray-100">
+                    <div style="width: {{ $aktifPct }}%; background-color: #890620;"></div>
+                    <div style="width: {{ $potensiPct }}%; background-color: #348AA7;"></div>
+                </div>
+                <div class="mt-2.5 flex items-center gap-5 font-mono text-[11px] text-gray-500">
+                    <span><span class="tabular-nums font-semibold" style="color:#890620;">{{ $stats['aktif'] }}</span> Aktif</span>
+                    <span><span class="tabular-nums font-semibold" style="color:#348AA7;">{{ $stats['potensi'] }}</span> Potensi</span>
+                </div>
+
+                {{-- scale: land + people --}}
+                <div class="mt-5 pt-4 border-t border-gray-100 flex items-end gap-6">
+                    <div>
+                        <p class="font-mono text-3xl text-gray-900 tabular-nums leading-none">{{ round($stats['luas'] / 1000) }}</p>
                         <p class="mt-1.5 text-[11px] text-gray-400">Hektar terdampak</p>
                     </div>
-                    <div class="bg-white px-3 py-3">
-                        <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none">{{ (int) $stats['kk'] }}</p>
+                    <div>
+                        <p class="font-mono text-3xl text-gray-900 tabular-nums leading-none">{{ (int) $stats['kk'] }}</p>
                         <p class="mt-1.5 text-[11px] text-gray-400">KK terdampak</p>
                     </div>
                 </div>
-
-
             </div>
 
+            {{-- Layers --}}
+            <div class="flex-shrink-0 px-6 py-5 border-b border-gray-100">
+                <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mb-2">Layers</p>
+                <div class="flex flex-col">
+                    @foreach ($layers as $l)
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-md hover:bg-gray-50 transition cursor-pointer select-none">
+                            <span class="flex-1 text-[13px] text-gray-700">{{ __($l['name']) }}</span>
+                            <span class="relative flex flex-shrink-0">
+                                <input type="checkbox" id="{{ $l['id'] }}" class="peer sr-only" @checked($l['checked'])>
+                                <span class="block h-4 w-7 rounded-full bg-gray-200 peer-checked:bg-accent-500 transition-colors"></span>
+                                <span class="absolute w-2.5 h-2.5 bg-white rounded-full left-[3px] top-[3px] peer-checked:translate-x-full transition"></span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
 
-
-            {{-- Conflict list --}}
+            {{-- Case list --}}
             <div class="flex-1 flex flex-col min-h-0">
-                <div class="flex-shrink-0 px-6 pt-5 pb-3 flex items-center justify-between">
-                    <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400"> Konflik Terbaru</p>
+                <div class="flex-shrink-0 px-6 pt-5 pb-2 flex items-baseline justify-between">
+                    <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400">Daftar Konflik</p>
                     <span class="font-mono text-[10px] text-gray-300 tabular-nums">{{ count($konfliks) }}</span>
                 </div>
-                <div class="flex-1 overflow-y-auto px-3 pb-4 space-y-0.5">
+                <div class="flex-1 overflow-y-auto px-3 pb-4">
                     @forelse ($konfliks as $k)
                         <button type="button"
                             onclick="focusKonflik({{ $k->id }}, {{ $k->lat }}, {{ $k->long }})"
-                            class="w-full text-left px-3 py-2.5 rounded-md hover:bg-gray-50 transition group">
-                            <div class="flex items-start gap-2.5">
-                                <span class="mt-1 w-2.5 h-2.5 rounded-full flex-shrink-0 {{ $k->status === 'aktif' ? 'bg-[#890620]' : 'bg-white border-[3px] border-[#348AA7]' }}"></span>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-[13px] font-medium text-gray-900 truncate group-hover:text-gray-950">
+                            class="w-full text-left flex gap-3 pl-2.5 pr-3 py-2.5 rounded-md hover:bg-gray-50 transition group">
+                            {{-- status ledger rule --}}
+                            <span class="w-[3px] self-stretch rounded-full flex-shrink-0"
+                                  style="background-color: {{ $k->status === 'aktif' ? '#890620' : '#348AA7' }};"></span>
+                            <span class="min-w-0 flex-1">
+                                <span class="flex items-baseline justify-between gap-2">
+                                    <span class="text-[13px] font-medium text-gray-900 truncate group-hover:text-gray-950">
                                         {{ $k->desa ?: $k->kecamatan ?: $k->kabkota ?: 'Tanpa nama' }}
-                                    </p>
-                                    <p class="text-[11px] text-gray-400 truncate">{{ $k->kabkota }}{{ $k->provinsi ? ', '.$k->provinsi : '' }}</p>
-                                    <p class="mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
-                                        {{ number_format($k->luas, 0, '.', ',') }} ha · {{ number_format($k->kk, 0, '.', ',') }} KK
-                                    </p>
-                                </div>
-                            </div>
+                                    </span>
+                                    <span class="font-mono text-[9px] uppercase tracking-wider flex-shrink-0"
+                                          style="color: {{ $k->status === 'aktif' ? '#890620' : '#348AA7' }};">{{ $k->status }}</span>
+                                </span>
+                                <span class="block text-[11px] text-gray-400 truncate">{{ $k->kabkota }}{{ $k->provinsi ? ', '.$k->provinsi : '' }}</span>
+                                <span class="block mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
+                                    {{ number_format($k->luas, 0, '.', ',') }} ha · {{ number_format($k->kk, 0, '.', ',') }} KK
+                                </span>
+                            </span>
                         </button>
                     @empty
                         <p class="px-3 py-6 text-center text-xs text-gray-400">Belum ada data konflik.</p>
                     @endforelse
                 </div>
+            </div>
+
+            {{-- Provenance --}}
+            <div class="flex-shrink-0 px-6 py-3 border-t border-gray-100">
+                <p class="font-mono text-[10px] text-gray-300 tracking-wide">Data · Auriga Nusantara</p>
             </div>
         </aside>
 
