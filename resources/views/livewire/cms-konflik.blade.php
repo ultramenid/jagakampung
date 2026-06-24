@@ -352,15 +352,17 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
             // ── Main sidebar renderer ─────────────────────────────────────────────
             function renderSidebar(data) {
                 const status = data.data.atribut.status;
-                const isAktif = status === 'aktif';
-                const clrDot = isAktif ? '#890620' : '#348AA7';
-                const clrBg = isAktif ? '#fef2f2' : '#eff8fb';
-                const clrText = isAktif ? '#890620' : '#1d7a95';
+                const colors = {
+                    aktif: { dot: '#890620', bg: '#fef2f2', text: '#890620' },
+                    potensi: { dot: '#348AA7', bg: '#eff8fb', text: '#1d7a95' },
+                    draft: { dot: '#605B51', bg: '#f5f5f0', text: '#605B51' },
+                };
+                const c = colors[status] ?? colors.draft;
                 const totalLamp = data?.data?.media?.lampiran?.length ?? 0;
                 const totalMedia = data?.data?.media?.gambar?.length ?? 0;
-                const totalArtikel = data?.data?.media?.artikel?.length ?? 0;
-                const badgeStyle = `background:${clrBg};color:${clrText};`;
-                const borderColor = isAktif ? '#890620' : '#348AA7';
+                const totalArtikel = data?.data?.artikel?.length ?? 0;
+                const badgeStyle = `background:${c.bg};color:${c.text};`;
+                const borderColor = c.dot;
 
                 sidebarContent.innerHTML = `
                 <div x-data="{ tab: 'general' }">
@@ -368,9 +370,9 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                     <div class="px-5 pt-4 pb-3 border-b border-gray-100 flex items-start justify-between gap-3">
                         <div class="min-w-0">
                             <div class="flex items-center gap-2 mb-1">
-                                <span style="background:${clrBg};color:${clrText};"
+                                <span style="background:${c.bg};color:${c.text};"
                                       class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex-shrink-0">
-                                    <span style="width:5px;height:5px;border-radius:50%;background:${clrDot};display:inline-block;flex-shrink:0;"></span>
+                                    <span style="width:5px;height:5px;border-radius:50%;background:${c.dot};display:inline-block;flex-shrink:0;"></span>
                                     ${status}
                                 </span>
                             </div>
@@ -420,7 +422,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                 style="border-color:${borderColor}"
                                 class="py-3 px-1 text-xs transition focus:outline-none cursor-pointer">
                             Artikel
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="${badgeStyle}">${totalMedia}</span>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="${badgeStyle}">${totalArtikel}</span>
                         </button>
                     </div>
 
@@ -540,37 +542,38 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                         ${
                             data.data.artikel && data.data.artikel.length > 0
                             ? `
-                                    <div class="space-y-3">
+                                    <div class="space-y-4">
                                         ${data.data.artikel.map(item => `
                                     <a href="${APP_URL}/cms/edit-artikel/${item.id}"
-                                    class="block border border-gray-100 rounded-xl p-3 hover:border-gray-300 hover:bg-gray-50 transition">
+                                    class="block border border-gray-100 rounded-xl overflow-hidden hover:border-gray-300 hover:bg-gray-50 transition">
 
-                                        <div class="flex gap-3">
+                                        ${
+                                            item.gambar
+                                            ? `<img src="/storage/${item.gambar}"
+                                                            class="w-full h-44 object-cover">`
+                                            : `<div class="w-full h-44 bg-gray-100 flex items-center justify-center text-gray-300 text-xs">
+                                                        Tidak ada gambar
+                                                    </div>`
+                                        }
+
+                                        <div class="p-4 space-y-2">
+                                            <p class="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">
+                                                ${item.judul_id}
+                                            </p>
 
                                             ${
-                                                item.gambar
-                                                ? `<img src="/storage/${item.gambar}"
-                                                                class="w-16 h-16 rounded-lg object-cover flex-shrink-0">`
-                                                : `<div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-xs">
-                                                            No Img
-                                                        </div>`
+                                                item.deskripsi_id
+                                                ? `<p class="text-xs text-gray-500 line-clamp-3 leading-relaxed">
+                                                        ${item.deskripsi_id}
+                                                    </p>`
+                                                : ''
                                             }
 
-                                            <div class="min-w-0 flex-1">
-                                                <p class="text-xs font-semibold text-gray-800 line-clamp-2">
-                                                    ${item.judul_id}
-                                                </p>
-
-                                                <p class="text-[10px] text-gray-400 mt-1">
-                                                    ${item.tanggal_publish ?? '-'}
-                                                </p>
-
-                                                <p class="text-[10px] text-gray-300 truncate mt-1">
-                                                    /${item.slug}
-                                                </p>
-                                            </div>
-
+                                            <p class="text-[10px] text-gray-400 pt-1">
+                                                ${item.tanggal_publish ?? '-'}
+                                            </p>
                                         </div>
+
                                     </a>
                                 `).join('')}
                                     </div>
