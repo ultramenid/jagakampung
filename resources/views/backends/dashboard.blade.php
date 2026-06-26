@@ -25,7 +25,7 @@
             <span class="font-mono text-6xl font-semibold text-gray-900 tabular-nums leading-none">
                 {{ $fmt($stats['konflik']) }}
             </span>
-            <span class="text-sm text-gray-500 pb-1.5">kasus tercatat</span>
+            <span class="text-sm text-gray-500 pb-1.5">konflik tercatat</span>
         </div>
         <div class="mt-5 flex flex-wrap items-center gap-x-8 gap-y-2 text-sm text-gray-600">
             <span><span class="gk-mono font-semibold text-gray-900">{{ number_format(round($stats['luas']), 0, '.', ',') }}</span> ha lahan terdampak</span>
@@ -35,7 +35,7 @@
 
     {{-- Caseload composition — one ledger bar, segments sized by status --}}
     <div class="gk-card p-4 mb-10">
-        <p class="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-3">Komposisi caseload</p>
+        <p class="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-3">Komposisi konflik</p>
         <div class="flex h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
             @foreach ($statusMeta as $key => $meta)
                 @php $w = round(($byStatus[$key] ?? 0) / $caseTotal * 100, 2); @endphp
@@ -73,7 +73,7 @@
     {{-- Recent cases — the ledger --}}
     <div>
         <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-semibold text-gray-900">Kasus Terbaru</h2>
+            <h2 class="text-sm font-semibold text-gray-900">konflik Terbaru</h2>
             <a href="{{ url('/cms/konflik') }}" class="text-xs text-accent-500 hover:text-accent-600 font-medium">Lihat peta →</a>
         </div>
         <div class="gk-card overflow-hidden">

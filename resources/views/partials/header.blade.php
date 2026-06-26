@@ -9,7 +9,7 @@
                     <span class="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b8324a] opacity-60"></span>
                     <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#b8324a]"></span>
                 </span>
-                Pemantau aktif
+
             </span>
         </div>
         @include('partials.toogleprofile')

@@ -23,7 +23,7 @@
                 </a>
                 <div class="mt-1.5 flex items-center gap-2">
                     <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400">Peta Konflik </span>
-                    <span class="relative flex h-1.5 w-1.5" title="Pemantau aktif">
+                    <span class="relative flex h-1.5 w-1.5" title="">
                         <span class="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b8324a] opacity-60"></span>
                         <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#b8324a]"></span>
                     </span>
@@ -33,7 +33,7 @@
             {{-- Caseload — the thesis: how big, how active --}}
             <div class="flex-shrink-0 px-6 pt-5 pb-6 border-b border-gray-100">
                 <div class="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider text-gray-400">
-                    <span>Status Kasus</span>
+                    <span>Status konflik</span>
                     <span class="tabular-nums">{{ $stats['total'] }} titik · {{ $stats['provinsi'] }} provinsi</span>
                 </div>
 
