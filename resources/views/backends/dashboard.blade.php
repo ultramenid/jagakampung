@@ -103,5 +103,33 @@
         </div>
     </div>
 
+    {{-- Draft articles --}}
+    <div class="mt-8">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-semibold text-gray-900">Artikel Perlu Publis</h2>
+            <span class="font-mono text-[10px] text-gray-400 tabular-nums">{{ count($draftArtikel) }} draft</span>
+        </div>
+        <div class="gk-card overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-2 border-b border-gray-100 font-mono text-[10px] uppercase tracking-widest text-gray-400">
+                <span>Judul · Lokasi</span><span>Tanggal</span>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @forelse ($draftArtikel as $a)
+                    <a href="{{ url('/cms/edit-artikel/' . $a->id) }}" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ $a->judul_id }}</p>
+                            <p class="text-xs text-gray-400 truncate">{{ $a->desa }}, {{ $a->kabkota }}</p>
+                        </div>
+                        <span class="font-mono text-[11px] text-gray-400 shrink-0">{{ $a->created_at ? \Carbon\Carbon::parse($a->created_at)->format('d/m/Y') : '-' }}</span>
+                    </a>
+                @empty
+                    <div class="px-4 py-12 text-center">
+                        <p class="text-sm text-gray-500">Semua artikel sudah terpublish.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection

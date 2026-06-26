@@ -42,7 +42,7 @@ window.focusKonflik = function (id, lat, lng) {
     openSidebar();
     showLoading();
 
-    fetch(`/cms/rest-map/${id}`)
+    fetch(`/cms/rest-map/${id}?source=public`)
         .then(res => {
             if (!res.ok) throw new Error('HTTP error ' + res.status);
             return res.json();
@@ -554,7 +554,7 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
         openSidebar();
         showLoading();
 
-        fetch(`/cms/rest-map/${id}`)
+        fetch(`/cms/rest-map/${id}?source=public`)
             .then((res) => {
                 if (!res.ok) throw new Error("HTTP error " + res.status);
                 return res.json();

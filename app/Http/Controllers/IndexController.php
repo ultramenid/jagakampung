@@ -17,7 +17,7 @@ class IndexController extends Controller
             'total'    => (clone $base)->count(),
             'aktif'    => (clone $base)->where('status', 'aktif')->count(),
             'potensi'  => (clone $base)->where('status', 'potensi')->count(),
-            'luas'     => (float) (clone $base)->sum('luas'),
+            'luas'     => (clone $base)->get()->sum(fn ($r) => round((float) $r->luas)),
             'kk'       => (int) (clone $base)->sum('kk'),
             'provinsi' => (clone $base)->distinct('provinsi')->count('provinsi'),
         ];

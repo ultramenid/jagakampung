@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
         $stats = [
             'konflik'    => DB::table('konflik')->count(),
-            'luas'       => (int) DB::table('konflik')->sum('luas'),   // hektar terdampak
+            'luas'       => DB::table('konflik')->get()->sum(fn ($r) => round((float) $r->luas)), // hektar terdampak
             'kk'         => (int) DB::table('konflik')->sum('kk'),     // kepala keluarga
             'perusahaan' => DB::table('perusahaans')->count(),
             'instansi'   => DB::table('instansi')->count(),
@@ -33,6 +33,15 @@ class DashboardController extends Controller
         $recent = DB::table('konflik')->latest('id')->limit(6)
             ->get(['id', 'desa', 'kabkota', 'provinsi', 'status', 'created_at']);
 
-        return view('backends.dashboard', compact('title', 'nav', 'stats', 'byStatus', 'recent'));
+        $draftArtikel = DB::table('artikel')
+            ->join('konflik', 'artikel.konflik_id', '=', 'konflik.id')
+            ->where('artikel.status', 'draft')
+            ->when(session('role_id') !== 0, fn ($q) => $q->where('konflik.user_id', session('id')))
+            ->select('artikel.id', 'artikel.judul_id', 'artikel.created_at', 'konflik.desa', 'konflik.kabkota')
+            ->latest('artikel.created_at')
+            ->limit(10)
+            ->get();
+
+        return view('backends.dashboard', compact('title', 'nav', 'stats', 'byStatus', 'recent', 'draftArtikel'));
     }
 }

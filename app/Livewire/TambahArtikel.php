@@ -19,11 +19,13 @@ class TambahArtikel extends Component
     public $gambar;
     public $sumber;
     public $tanggal_publish;
+    public $status;
 
     // ambil konflik_id
     public function mount($id)
     {
         $this->konflik_id = $id;
+        $this->status = session('role_id') === 0 ? 'draft' : 'draft';
     }
 
     // simpan ke database 
@@ -65,6 +67,7 @@ class TambahArtikel extends Component
                 'deskripsi_en' => $this->deskripsi_en ?? 'desk_en',
                 'gambar' => $gambarPath,
                 'sumber' => $this->sumber,
+                'status' => $this->status ?? 'draft',
                 'tanggal_publish' => Carbon::parse($this->tanggal_publish)->format('Y-m-d'),
                 'created_at' => Carbon::now('Asia/Jakarta'),
             ]);

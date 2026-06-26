@@ -46,7 +46,9 @@ class LocalServiceController extends Controller
         return json_encode($allfeatures, JSON_PRETTY_PRINT);
     }
 
-    public function kasusDetail($id){
+    public function kasusDetail(Request $request, $id){
+        $isPublic = $request->query('source') === 'public';
+        $statusFilter = $isPublic ? " AND artikel.status = 'publish'" : '';
         $data = DB::table('konflik')->select('konflik.*',
             DB::raw('(SELECT JSON_ARRAYAGG(nama) FROM konflik_gambar WHERE konflik_gambar.konflik_id = konflik.id) as gambar'),
             DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT("nama", nama, "file", file)) FROM konflik_lampiran WHERE konflik_lampiran.konflik_id = konflik.id) as lampiran'),
@@ -61,11 +63,12 @@ class LocalServiceController extends Controller
                             "deskripsi_id", deskripsi_id,
                             "deskripsi_en", deskripsi_en,
                             "tanggal_publish", tanggal_publish,
-                            "sumber", sumber
+                            "sumber", sumber,
+                            "status", status
                         )
                     )
                     FROM artikel
-                    WHERE artikel.konflik_id = konflik.id
+                    WHERE artikel.konflik_id = konflik.id' . $statusFilter . '
                 ) as artikel')
         )
         ->where('konflik.id', $id)

@@ -41,6 +41,18 @@
                     <label class="gk-label">Tanggal Publish</label>
                     <input wire:model="tanggal_publish" type="date" class="gk-input">
                 </div>
+
+                <div>
+                    <label class="gk-label">Status</label>
+                    @if (session('role_id') === 0)
+                        <select wire:model="status" class="gk-select">
+                            <option value="draft">Draft</option>
+                            <option value="publish">Publish</option>
+                        </select>
+                    @else
+                        <input type="text" value="Draft" disabled class="gk-input bg-gray-100 text-gray-500">
+                    @endif
+                </div>
             </div>
 
             <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-100">

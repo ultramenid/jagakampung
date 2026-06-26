@@ -19,6 +19,7 @@ class EditArtikel extends Component
     public $gambar;
     public $sumber;
     public $tanggal_publish;
+    public $status;
 
     public function mount($id)
     {
@@ -43,6 +44,7 @@ class EditArtikel extends Component
         $this->gambar = $data->gambar;
         $this->sumber = $data->sumber;
         $this->tanggal_publish = $data->tanggal_publish;
+        $this->status = $data->status;
     }
 
     public function storeDatabase()
@@ -74,7 +76,7 @@ class EditArtikel extends Component
                     $this->gambar = DB::table('artikel')->where('id', $this->artikel_id)->value('gambar');
                 }
 
-                DB::table('artikel')->where('id', $this->artikel_id)->update([
+                $updateData = [
                     'judul_id' => $this->judul_id,
                     'judul_en' => $this->judul_en,
                     'slug' => \Str::slug($this->judul_id),
@@ -84,7 +86,13 @@ class EditArtikel extends Component
                     'sumber' => $this->sumber,
                     'tanggal_publish' => $this->tanggal_publish,
                     'updated_at' => now(),
-                ]);
+                ];
+
+                if (session('role_id') === 0) {
+                    $updateData['status'] = $this->status;
+                }
+
+                DB::table('artikel')->where('id', $this->artikel_id)->update($updateData);
 
                  redirect()->to('/cms/konflik');
                 
