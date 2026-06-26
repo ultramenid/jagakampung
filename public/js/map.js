@@ -339,17 +339,15 @@ function renderSidebar(data) {
 
                 <div class="h-px bg-gray-100"></div>
 
-                <div class="space-y-4">
+                <div class="space-y-3">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Deskripsi</p>
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-                        <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Deskripsi Konflik</div>
-                            <div class="text-xs font-semibold text-gray-800">${data.data.deskripsi.konflik ?? "—"}</div>
-                        </div>
-                        <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Deskripsi Perjuangan</div>
-                            <div class="text-xs font-semibold text-gray-800 leading-snug">${data.data.deskripsi.perjuangan ?? "—"}</div>
-                        </div>
+                    <div class="bg-gray-50 rounded-xl px-3 py-2.5">
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Deskripsi Konflik</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${data.data.deskripsi.konflik ?? "—"}</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl px-3 py-2.5">
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Deskripsi Perjuangan</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${data.data.deskripsi.perjuangan ?? "—"}</div>
                     </div>
                 </div>
 

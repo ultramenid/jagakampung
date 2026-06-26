@@ -707,6 +707,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
 
                     L.geoJSON(data, {
                         onEachFeature: function(feature) {
+                            if (userRole !== 0 && feature.properties.user_id != userId) return;
                             let marker;
                             if (feature.properties.status === 'aktif') {
                                 marker = registerMarker(feature, 0, iconAktif);
