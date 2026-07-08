@@ -1,0 +1,10 @@
+tools:
+    shell:
+        allow:
+            - grep *
+            - node *
+            - echo *
+paths:
+    allow:
+        - path: /Users/aiti/jagakampung/public/js/**
+          write: true

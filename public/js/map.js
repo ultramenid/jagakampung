@@ -16,8 +16,14 @@ var APP_URL = window.location.origin;
 let isAktifVisible = true;
 let isPotensiVisible = true;
 
-// Simpan data marker by id untuk akses saat klik
-const markerDataMap = {};
+// Map untuk menyimpan marker berdasarkan koordinat (lat,lng string) - untuk cluster lookup
+const markersByCoord = {};
+
+// Cache semua konflik untuk pencarian koordinat
+let allKonflikData = [];
+
+// Track apakah marker sudah diklik (untuk menghindari konflik dengan map click)
+let markerClicked = false;
 
 // SIDEBAR
 const sidebar = document.getElementById("sidebar");
@@ -40,41 +46,90 @@ window.closeSidebar = function () {
 function updateSelectedKonflik(id) {
     const url = new URL(window.location.href);
     if (id) {
-        url.searchParams.set('konflik', id);
+        url.searchParams.set("konflik", id);
     } else {
-        url.searchParams.delete('konflik');
+        url.searchParams.delete("konflik");
     }
-    window.history.replaceState({}, '', url);
+    window.history.replaceState({}, "", url);
 }
 
 function getSelectedKonflik() {
-    return new URLSearchParams(window.location.search).get('konflik');
+    return new URLSearchParams(window.location.search).get("konflik");
 }
 
 // Fly to a konflik from the left-rail list and load its detail
-window.focusKonflik = function (id, lat, lng) {
-    map.setView([lat, lng], 12, { animate: true });
-    openSidebar();
-    showLoading();
-    updateSelectedKonflik(id);
+window.focusKonflik = function (id, lat, lng, skipClusterCheck) {
+    // Cek apakah ada beberapa konflik di koordinat yang sama (dengan tolerance kecil)
+    // Hanya cek jika skipClusterCheck = false (klik dari sidebar kiri)
+    if (!skipClusterCheck) {
+        const nearbyConflicts = [];
+        const tolerance = 0.0001; // tolerance untuk perbedaan koordinat
 
-    fetch(`/cms/rest-map/${id}?source=public`)
-        .then(res => {
-            if (!res.ok) throw new Error('HTTP error ' + res.status);
-            return res.json();
-        })
-        .then(res => {
-            if (!res || !res.data) throw new Error('Data kosong');
-            renderSidebar(res);
-        })
-        .catch(err => {
-            console.error('Fetch error:', err);
-            sidebarContent.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-12 px-8 text-center">
-                    <p class="text-sm font-medium text-gray-600">Gagal memuat data</p>
-                    <p class="text-xs text-gray-400 mt-1">ID: ${id}, ${err.message}</p>
-                </div>`;
+        allKonflikData.forEach((f) => {
+            const fLat = parseFloat(f.properties.lat);
+            const fLng = parseFloat(f.properties.long);
+            const status = (f.properties.status || "").toLowerCase();
+
+            // Cek apakah koordinat sama (dengan tolerance)
+            if (
+                (status === "aktif" || status === "potensi") &&
+                Math.abs(fLat - lat) < tolerance &&
+                Math.abs(fLng - lng) < tolerance
+            ) {
+                nearbyConflicts.push({
+                    id: f.properties.id,
+                    status: f.properties.status,
+                    lat: fLat,
+                    lng: fLng,
+                    desa: f.properties.desa,
+                    kecamatan: f.properties.kecamatan,
+                    kabkota: f.properties.kabkota,
+                    provinsi: f.properties.provinsi,
+                    luas: f.properties.luas,
+                    kk: f.properties.kk,
+                });
+            }
         });
+
+        // Jika ada lebih dari satu konflik di lokasi yang sama, zoom dulu ke titiknya
+        // baru tampilkan pilihan (FIX: sebelumnya map.setView tidak pernah terpanggil
+        // di kasus ini karena ada `return` sebelum baris map.setView di bawah)
+        if (nearbyConflicts.length > 1) {
+            map.setView([lat, lng], 18, { animate: true });
+            setTimeout(() => {
+                showClusterKonflikList(nearbyConflicts, lat, lng);
+            }, 300);
+            return;
+        }
+    }
+
+    // Jika hanya satu konflik atau skipClusterCheck=true, langsung tampilkan detail
+    // Zoom ke level 18 agar cluster "pecah" (level zoom tinggi menampilkan marker individu)
+    map.setView([lat, lng], 18, { animate: true });
+
+    setTimeout(() => {
+        openSidebar();
+        showLoading();
+        updateSelectedKonflik(id);
+
+        fetch(`/cms/rest-map/${id}?source=public`)
+            .then((res) => {
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+                return res.json();
+            })
+            .then((res) => {
+                if (!res || !res.data) throw new Error("Data kosong");
+                renderSidebar(res);
+            })
+            .catch((err) => {
+                console.error("Fetch error:", err);
+                sidebarContent.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 px-8 text-center">
+                        <p class="text-sm font-medium text-gray-600">Gagal memuat data</p>
+                        <p class="text-xs text-gray-400 mt-1">ID: ${id}, ${err.message}</p>
+                    </div>`;
+            });
+    }, 300);
 };
 
 // BASEMAP
@@ -227,9 +282,21 @@ function renderLampiran(data) {
 function renderSidebar(data) {
     const status = data.data.atribut.status;
     const colors = {
-        aktif: { dot: "var(--color-status-aktif)", bg: "#fef2f2", text: "var(--color-status-aktif)" },
-        potensi: { dot: "var(--color-status-potensi)", bg: "#eff8fb", text: "#1d7a95" },
-        draft: { dot: "var(--color-status-draft)", bg: "#f5f5f0", text: "var(--color-status-draft)" },
+        aktif: {
+            dot: "var(--color-status-aktif)",
+            bg: "#fef2f2",
+            text: "var(--color-status-aktif)",
+        },
+        potensi: {
+            dot: "var(--color-status-potensi)",
+            bg: "#eff8fb",
+            text: "#1d7a95",
+        },
+        draft: {
+            dot: "var(--color-status-draft)",
+            bg: "#f5f5f0",
+            text: "var(--color-status-draft)",
+        },
     };
     const c = colors[status] ?? colors.draft;
     const totalLamp = data?.data?.media?.lampiran?.length ?? 0;
@@ -328,7 +395,7 @@ function renderSidebar(data) {
                     <div class="grid grid-cols-2 gap-2 mt-2">
                         <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                             <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Luas Ha</div>
-                            <div class="text-xs font-semibold text-gray-800">${data.data.atribut.luas != null ? Number(data.data.atribut.luas) : '—'}</div>
+                            <div class="text-xs font-semibold text-gray-800">${data.data.atribut.luas != null ? Number(data.data.atribut.luas) : "—"}</div>
                         </div>
                         <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                             <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">KK</div>
@@ -519,29 +586,10 @@ const iconPotensi = L.divIcon({
     html: `<div style="width:20px;height:20px;border-radius:50%;background:white;border:3px solid var(--color-status-potensi);box-shadow:0 1px 6px rgba(52,138,167,0.35);"></div>`,
 });
 
-// ── PRUNE CLUSTER: Custom single marker icon ──────────────────────────
-// ── PRUNE CLUSTER: Custom single marker icon ──────────────────────────
+// PrepareLeafletMarker dipanggil untuk setiap marker individual (bukan cluster)
+// Kita override ini untuk menambahkan click handler pada marker
 pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
-    // const html = `
-    //     <div style="
-    //         width:14px;
-    //         height:14px;
-    //         background:#890620;
-    //         border:2px solid #ffffff;
-    //         border-radius:50%;
-    //         box-shadow:0 1px 4px rgba(0,0,0,0.3);
-    //     "></div>
-    // `;
-
-    // leafletMarker.setIcon(L.divIcon({
-    //     html,
-    //     className: '',
-    //     iconSize: L.point(14, 14),
-    //     iconAnchor: L.point(7, 7)
-    // }));
-
     const status = data.status?.toLowerCase();
-
     let icon;
 
     if (status === "aktif") {
@@ -554,8 +602,6 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
 
     leafletMarker.setIcon(icon);
 
-    // Hapus listener lama dulu, baru pasang yang baru
-    // Simpan id ke element agar tidak kehilangan referensi saat closure
     const id = data.id;
 
     if (leafletMarker._konflikClickBound) {
@@ -563,8 +609,8 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
     }
 
     leafletMarker._konflikClickBound = function () {
-        console.log("Marker klik, id:", id); // debug
-
+        markerClicked = true; // Set flag untuk mencegah map click menangani ini
+        console.log("Marker klik, id:", id);
         openSidebar();
         showLoading();
         updateSelectedKonflik(id);
@@ -575,7 +621,7 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
                 return res.json();
             })
             .then((res) => {
-                console.log("Response:", res); // debug
+                console.log("Response:", res);
                 if (!res || !res.data) throw new Error("Data kosong");
                 renderSidebar(res);
             })
@@ -598,7 +644,86 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
     leafletMarker.on("click", leafletMarker._konflikClickBound);
 };
 
-// ── FETCH & TAMBAH MARKER KE PRUNE CLUSTER ────────────────────────────
+// ── CLUSTER CLICK HANDLER ────────────────────────────────────────
+function showClusterKonflikList(clusterMarkers, originalLat, originalLng) {
+    // Urutkan berdasarkan status: aktif dulu, lalu potensi
+    clusterMarkers.sort((a, b) => {
+        const statusA = (a.status || "").toLowerCase();
+        const statusB = (b.status || "").toLowerCase();
+        if (statusA === "aktif" && statusB !== "aktif") return -1;
+        if (statusA !== "aktif" && statusB === "aktif") return 1;
+        return 0;
+    });
+
+    const html = `
+        <div class="p-5">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">Pilih Konflik</h3>
+            <p class="text-xs text-gray-400 mb-3">${clusterMarkers.length} konflik di lokasi ini</p>
+            <div class="space-y-2 max-h-[400px] overflow-y-auto">
+                ${clusterMarkers
+                    .map((m) => {
+                        const isAktif =
+                            (m.status || "").toLowerCase() === "aktif";
+                        return `
+                    <button type="button"
+                        onclick="pickKonflik(${m.id})"
+                        class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-50 focus-visible:bg-gray-50 transition group">
+                        <span aria-hidden="true" class="w-2 h-2 rounded-full flex-shrink-0 ${isAktif ? "bg-status-aktif" : "bg-status-potensi"}"></span>
+                        <span class="min-w-0 flex-1">
+                            <span class="flex items-baseline justify-between gap-2">
+                                <span class="text-[13px] font-medium text-gray-900 truncate group-hover:text-gray-950">
+                                    ${m.desa || m.kecamatan || m.kabkota || "Tanpa nama"}
+                                </span>
+                                <span class="font-mono text-[9px] uppercase tracking-wider flex-shrink-0 ${isAktif ? "text-status-aktif" : "text-status-potensi"}">${m.status}</span>
+                            </span>
+                            <span class="block text-[11px] text-gray-400 truncate">${m.kabkota || ""}${m.provinsi ? ", " + m.provinsi : ""}</span>
+                            <span class="block mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
+                                ${Number(m.luas || 0).toLocaleString("id-ID")} ha · ${Number(m.kk || 0).toLocaleString("id-ID")} KK
+                            </span>
+                        </span>
+                    </button>
+                    `;
+                    })
+                    .join("")}
+            </div>
+        </div>
+    `;
+
+    sidebarContent.innerHTML = html;
+    openSidebar();
+}
+
+function pickKonflik(id) {
+    // Fungsi ini HANYA dipanggil dari daftar pilihan konflik (showClusterKonflikList),
+    // dan daftar itu sendiri baru muncul SETELAH peta sudah di-zoom ke titik yang
+    // sama persis (dari focusKonflik atau klik cluster di peta). Jadi di sini
+    // TIDAK perlu map.setView() lagi sama sekali — peta sudah pasti di lokasi itu.
+    // Memanggil map.setView ulang (walau ke koordinat "yang sama") adalah
+    // penyebab sensasi "kedut/kedip" sebelumnya, karena animasi zoom sebelumnya
+    // belum tentu benar-benar selesai persis di saat dicek.
+    openSidebar();
+    showLoading();
+    updateSelectedKonflik(id);
+    fetch(`/cms/rest-map/${id}?source=public`)
+        .then((res) => {
+            if (!res.ok) throw new Error("HTTP error " + res.status);
+            return res.json();
+        })
+        .then((res) => {
+            if (!res || !res.data) throw new Error("Data kosong");
+            renderSidebar(res);
+        })
+        .catch((err) => {
+            console.error("Fetch error:", err);
+            sidebarContent.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12 px-8 text-center">
+                    <p class="text-sm font-medium text-gray-600">Gagal memuat data</p>
+                    <p class="text-xs text-gray-400 mt-1">ID: ${id}, ${err.message}</p>
+                </div>`;
+        });
+}
+
+// ── FETCH & TAMBAW MARKER KE PRUNE CLUSTER ────────────────────────────
 const initialSelectedId = getSelectedKonflik();
 
 fetch("/cms/rest-map/")
@@ -606,7 +731,37 @@ fetch("/cms/rest-map/")
     .then((data) => {
         if (!data.features) return;
 
+        // Simpan semua data untuk lookup koordinat di focusKonflik
+        allKonflikData = data.features;
+
         let selectedMarker = null;
+
+        // ── Deteksi koordinat yang sama persis (konflik "double") ──────
+        // PruneCluster mengelompokkan marker berdasarkan jarak PIKSEL di peta.
+        // Kalau dua konflik punya lat/lng yang PERSIS sama, jarak piksel di
+        // antara keduanya akan selalu 0 di zoom berapa pun — jadi cluster-nya
+        // TIDAK PERNAH bisa pecah walau sudah di-zoom sampai level 18.
+        // Fix: sebar sedikit (jitter) posisi VISUAL marker yang koordinatnya
+        // identik dalam radius kecil (~55m). Di zoom jauh, jarak ini masih
+        // kecil secara piksel sehingga tetap tergabung jadi satu cluster
+        // (tidak mengubah tampilan biasa). Di zoom 18 (saat cluster diklik
+        // atau salah satu konflik dipilih dari daftar), jarak ini sudah
+        // cukup besar secara piksel sehingga marker terpisah dan cluster
+        // benar-benar pecah. Data asli (lat/lng, info lokasi, dst) tetap
+        // disimpan utuh di marker.data, jadi tidak memengaruhi fetch detail
+        // maupun tampilan koordinat di sidebar.
+        const coordGroups = {};
+        data.features.forEach((item) => {
+            const lat = parseFloat(item.properties.lat);
+            const lng = parseFloat(item.properties.long);
+            if (isNaN(lat) || isNaN(lng)) return;
+            const status = item.properties.status?.toLowerCase();
+            if (status !== "aktif" && status !== "potensi") return;
+
+            const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            if (!coordGroups[key]) coordGroups[key] = [];
+            coordGroups[key].push(item);
+        });
 
         data.features.forEach((item) => {
             const lat = parseFloat(item.properties.lat);
@@ -619,16 +774,45 @@ fetch("/cms/rest-map/")
             // hanya tampil aktif
             if (status !== "aktif" && status !== "potensi") return;
 
-            // Buat PruneCluster.Marker (bukan L.marker)
-            const marker = new PruneCluster.Marker(lat, lng);
+            // Cek apakah item ini berbagi koordinat persis dengan item lain
+            const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            const group = coordGroups[key];
+
+            let markerLat = lat;
+            let markerLng = lng;
+
+            if (group.length > 1) {
+                const posInGroup = group.indexOf(item);
+                const radiusDeg = 0.0005; // ~55m, cukup agar terpisah di zoom 18
+                const angle = (2 * Math.PI * posInGroup) / group.length;
+                markerLat = lat + radiusDeg * Math.cos(angle);
+                markerLng = lng + radiusDeg * Math.sin(angle);
+            }
+
+            // Buat PruneCluster.Marker (bukan L.marker) — pakai posisi yang
+            // sudah di-jitter untuk RENDER, tapi data asli tetap lat/lng asal
+            const marker = new PruneCluster.Marker(markerLat, markerLng);
 
             // Simpan id di data marker untuk diakses saat klik
             marker.data.id = item.properties.id;
             marker.data.status = item.properties.status;
             marker.data.lat = lat;
             marker.data.lng = lng;
+            marker.data.desa = item.properties.desa;
+            marker.data.kecamatan = item.properties.kecamatan;
+            marker.data.kabkota = item.properties.kabkota;
+            marker.data.provinsi = item.properties.provinsi;
+            marker.data.luas = item.properties.luas;
+            marker.data.kk = item.properties.kk;
 
             pruneCluster.RegisterMarker(marker);
+
+            // Simpan marker berdasarkan koordinat untuk cluster lookup
+            const coordKey = `${lat},${lng}`;
+            if (!markersByCoord[coordKey]) {
+                markersByCoord[coordKey] = [];
+            }
+            markersByCoord[coordKey].push(marker.data);
 
             if (status === "aktif") {
                 marker.category = 0;
@@ -648,8 +832,54 @@ fetch("/cms/rest-map/")
         // Tambahkan pruneCluster ke map setelah semua marker terdaftar
         map.addLayer(pruneCluster);
 
+        // Event click pada map untuk mendeteksi cluster click dari peta
+        // Karena PruneCluster tidak memiliki event khusus untuk cluster, kita pakai map.on('click')
+        // dan deteksi apakah click adalah pada cluster dengan population > 1
+        map.on("click", function (e) {
+            // Jika marker sudah diklik, skip (marker click sudah dihandle oleh PrepareLeafletMarker)
+            if (markerClicked) {
+                markerClicked = false;
+                return;
+            }
+
+            // Cek apakah yang diklik adalah cluster dengan mencari marker terdekat
+            const cluster = pruneCluster.Cluster.FindClosest(e.latlng, 10);
+            if (cluster && cluster.population > 1) {
+                // Ini cluster - ambil data konflik LANGSUNG dari marker.data
+                // di dalam cluster (koordinat ASLI, bukan posisi hasil jitter),
+                // supaya tidak perlu lagi mencocokkan lewat posKey yang bisa
+                // meleset karena marker duplikat koordinat sudah digeser sedikit.
+                const clusterConflicts = cluster.markers.map((m) => ({
+                    id: m.data.id,
+                    status: m.data.status,
+                    lat: m.data.lat,
+                    lng: m.data.lng,
+                    desa: m.data.desa,
+                    kecamatan: m.data.kecamatan,
+                    kabkota: m.data.kabkota,
+                    provinsi: m.data.provinsi,
+                    luas: m.data.luas,
+                    kk: m.data.kk,
+                }));
+
+                // Zoom ke titik cluster dulu baru tampilkan daftar pilihan
+                map.setView(e.latlng, 18, { animate: true });
+                setTimeout(() => {
+                    showClusterKonflikList(
+                        clusterConflicts,
+                        e.latlng.lat,
+                        e.latlng.lng,
+                    );
+                }, 300);
+            }
+        });
+
         if (selectedMarker) {
-            map.setView([selectedMarker.data.lat, selectedMarker.data.lng], 12, { animate: true });
+            map.setView(
+                [selectedMarker.data.lat, selectedMarker.data.lng],
+                12,
+                { animate: true },
+            );
             openSidebar();
             showLoading();
             fetch(`/cms/rest-map/${selectedMarker.data.id}?source=public`)
@@ -706,14 +936,18 @@ function applyFilterStatus() {
 
 document.getElementById("toggleAktif").addEventListener("click", function () {
     isAktifVisible = !isAktifVisible;
-    document.getElementById("toggleAktif").setAttribute("aria-pressed", String(isAktifVisible));
+    document
+        .getElementById("toggleAktif")
+        .setAttribute("aria-pressed", String(isAktifVisible));
     this.classList.toggle("opacity-40");
     applyFilterStatus();
 });
 
 document.getElementById("togglePotensi").addEventListener("click", function () {
     isPotensiVisible = !isPotensiVisible;
-    document.getElementById("togglePotensi").setAttribute("aria-pressed", String(isPotensiVisible));
+    document
+        .getElementById("togglePotensi")
+        .setAttribute("aria-pressed", String(isPotensiVisible));
     this.classList.toggle("opacity-40");
     applyFilterStatus();
 });
