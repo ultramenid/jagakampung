@@ -24,7 +24,7 @@ class IndexController extends Controller
 
         $konfliks = (clone $base)
             ->select('id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'status', 'luas', 'kk', 'lat', 'long')
-            ->orderByRaw("FIELD(status, 'aktif', 'potensi')")
+            ->orderByRaw("CASE status WHEN 'aktif' THEN 0 WHEN 'potensi' THEN 1 ELSE 2 END")
             ->orderByDesc('luas')
             ->get();
 
