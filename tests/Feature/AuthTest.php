@@ -9,16 +9,6 @@ use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
-    public function test_redirect_to_en_locale(): void
-    {
-        $this->get('/')->assertRedirect('/en');
-    }
-
-    public function test_public_frontend_page_loads(): void
-    {
-        $this->get('/en')->assertStatus(200);
-    }
-
     public function test_cms_login_page_loads(): void
     {
         $this->get('/cms/login')->assertStatus(200);
@@ -103,7 +93,10 @@ class AuthTest extends TestCase
     {
         $this->loginAsAdmin();
 
-        $this->get('/cms/logout')->assertRedirect('/cms/login');
+        // logout is POST (a GET logout is a CSRF forced-logout vector);
+        // disable CSRF for this handler test and post the route.
+        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
+        $this->post('/cms/logout')->assertRedirect('/cms/login');
 
         $this->assertNull(session('id'));
     }

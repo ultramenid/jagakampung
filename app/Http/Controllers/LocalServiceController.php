@@ -12,7 +12,7 @@ class LocalServiceController extends Controller
             ->select('id', 'lat', 'long', 'status', 'user_id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'luas', 'kk', 'group', 'perusahaan');
 
         // pengguna non-admin tidak boleh melihat konflik berstatus draft milik orang lain
-        if ((int) session('role_id') !== 0) {
+        if (session('role_id') === null || (int) session('role_id') !== 0) {
             $query->where(function ($q) {
                 $q->where('status', '!=', 'draft')
                   ->orWhere('user_id', session('id'));
@@ -55,7 +55,8 @@ class LocalServiceController extends Controller
     }
 
     public function kasusDetail(Request $request, $id){
-        $isPublic = $request->query('source') === 'public';
+        $isAdmin = (int) session('role_id') === 0;
+        $isPublic = ! $isAdmin;
         $statusFilter = $isPublic ? " AND artikel.status = 'publish'" : '';
         $data = DB::table('konflik')->select('konflik.*',
             DB::raw('(SELECT JSON_ARRAYAGG(nama) FROM konflik_gambar WHERE konflik_gambar.konflik_id = konflik.id) as gambar'),
@@ -83,6 +84,10 @@ class LocalServiceController extends Controller
         ->first();
 
         if (! $data) {
+            return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
+        }
+
+        if ($data->status === 'draft' && ! $isAdmin && (int) ($data->user_id ?? 0) !== (int) session('id')) {
             return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
         }
 

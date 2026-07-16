@@ -15,8 +15,9 @@
         <div class="space-y-6">
 
         {{-- SECTION 1: Lokasi --}}
-        <div class="gk-card overflow-hidden">
-            <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50">
+        {{-- ponytail: overflow-hidden removed so the absolute region dropdown can escape the card; header carries its own top rounding instead --}}
+        <div class="gk-card">
+            <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-md">
                 <div class="flex items-center justify-center w-7 h-7 rounded-md bg-gray-900 text-white font-mono text-xs shrink-0">1</div>
                 <div>
                     <h2 class="font-semibold text-gray-900 text-sm">Lokasi Konflik</h2>

@@ -125,7 +125,7 @@ class TambahKonflik extends Component
         // dd(session()->all());
 
         // kalo role nya user default ke draft
-        if (session('role_id') === 1) {
+        if ((int) session('role_id') === 1) {
             $this->selectedStatus = 'draft';
         }
 
@@ -170,7 +170,8 @@ class TambahKonflik extends Component
             // Simpan data lampiran terkait konflik
             foreach ($this->lampirans as $lampiran) {
 
-                $filenamelampiran = uniqid().'_'.$lampiran['filename'];
+                $ext = strtolower($lampiran['file']->getClientOriginalExtension());
+                $filenamelampiran = uniqid().'.'.$ext;
                 $pathLampiran = $lampiran['file']->storeAs('lampiran', $filenamelampiran, 'public');
 
                 DB::table('konflik_lampiran')->insert([
@@ -183,7 +184,8 @@ class TambahKonflik extends Component
 
             // simpan data image terkait konflik
             foreach ($this->images as $image) {
-                $filenamegambar = uniqid().'_'.$image->getClientOriginalName();
+                $ext = strtolower($image->getClientOriginalExtension());
+                $filenamegambar = uniqid().'.'.$ext;
                 $pathGambar = $image->storeAs('gambar', $filenamegambar, 'public');
 
                 DB::table('konflik_gambar')->insert([

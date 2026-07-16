@@ -191,7 +191,8 @@ class EditKonflik extends Component
                 $isTemp = $lampiran["file"] instanceof TemporaryUploadedFile;
 
                 if ($isTemp) {
-                    $filenamelampiran = uniqid() . "_" . $lampiran["filename"];
+                    $ext = strtolower($lampiran["file"]->getClientOriginalExtension());
+                    $filenamelampiran = uniqid() . "." . $ext;
                     $lampiran["file"]->storeAs(
                         "lampiran",
                         $filenamelampiran,
@@ -238,8 +239,8 @@ class EditKonflik extends Component
                 $isTemp = $image instanceof TemporaryUploadedFile;
 
                 if ($isTemp) {
-                    $filenamegambar =
-                        uniqid() . "_" . $image->getClientOriginalName();
+                    $ext = strtolower($image->getClientOriginalExtension());
+                    $filenamegambar = uniqid() . "." . $ext;
                     $image->storeAs("gambar", $filenamegambar, "public");
                 } else {
                     $filenamegambar = $image;

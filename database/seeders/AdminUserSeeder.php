@@ -9,13 +9,15 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
+        $password = \Illuminate\Support\Str::random(32);
+        User::forceCreate([
             'name' => 'Admin',
             'email' => 'admin@jagakampung.com',
-            'password' => bcrypt('password'),
+            'password' => bcrypt($password),
             'instansi' => 'JagaKampung',
-            'role' => 1,
+            'role' => 0,
             'is_active' => 1,
         ]);
+        dump("Initial admin password: {$password}");
     }
 }

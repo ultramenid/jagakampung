@@ -29,7 +29,7 @@ class TambahUser extends Component
                 'name' => $this->nama,
                 'email' => $this->email,
                 'instansi' => $this->instansi,
-                'role' => in_array($this->role, ['0', '1'], true) ? (int) $this->role : 1, // ponytail: whitelist role, default to User
+                'role' => in_array((string) $this->role, ['0', '1'], true) ? (int) $this->role : 1, // ponytail: whitelist role (cast to string: select sends '0'/'1', DB/tests may send int 0/1), default to User
                 'is_active' => 1,
                 'password' => Hash::make($this->password),
                 'created_at' => Carbon::now('Asia/Jakarta'),

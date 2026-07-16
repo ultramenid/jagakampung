@@ -116,6 +116,9 @@
                         const userRole = {{ session('role_id') ?? 0 }};
                         const userId = {{ session('id') ?? 0 }};
 
+                        // HTML-escape helper for DB-derived strings interpolated into innerHTML
+                        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
                         window.openSidebar = function() {
                             sidebar.style.transform = 'translateX(0)';
                             overlay.style.opacity = '1';
@@ -280,8 +283,8 @@
                             }
                             return `<div class="grid grid-cols-2 gap-2">
                 ${images.map(img => `
-                            <a href="/storage/gambar/${img}" class="glightbox group relative block overflow-hidden rounded-xl border border-gray-100">
-                                <img src="/storage/gambar/${img}" class="w-full h-36 object-cover transition duration-300 group-hover:scale-105" alt="${img}">
+                            <a href="/storage/gambar/${esc(img)}" class="glightbox group relative block overflow-hidden rounded-xl border border-gray-100">
+                                <img src="/storage/gambar/${esc(img)}" class="w-full h-36 object-cover transition duration-300 group-hover:scale-105" alt="${esc(img)}">
                                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition duration-300 flex items-center justify-center">
                                     <div class="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
@@ -331,7 +334,7 @@
                     const ext = (item.file.split('.').pop() || '').toUpperCase();
                     const c   = extColors[ext] ?? { bg: '#f3f4f6', text: '#374151' };
                     return `
-<a href="/storage/lampiran/${item.file}" target="_blank"
+<a href="/storage/lampiran/${esc(item.file)}" target="_blank"
 class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition group">
 
     <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold"
@@ -341,11 +344,11 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
 
     <div class="flex-1 min-w-0">
         <div class="text-xs font-semibold text-gray-800 truncate">
-            ${item.nama ?? item.file}
+            ${esc(item.nama ?? item.file)}
         </div>
 
         <div class="text-[10px] text-gray-400 truncate mt-0.5">
-            ${item.file}
+            ${esc(item.file)}
         </div>
     </div>
 
@@ -391,10 +394,10 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                 <span style="background:${c.bg};color:${c.text};"
                                       class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex-shrink-0">
                                     <span style="width:5px;height:5px;border-radius:50%;background:${c.dot};display:inline-block;flex-shrink:0;"></span>
-                                    ${status}
+                                    ${esc(status)}
                                 </span>
                             </div>
-                            <p class="text-[11px] text-gray-400 truncate">${data.data.lokasi.provinsi}, ${data.data.lokasi.kabkota}</p>
+                            <p class="text-[11px] text-gray-400 truncate">${esc(data.data.lokasi.provinsi)}, ${esc(data.data.lokasi.kabkota)}</p>
                         </div>
                         <div class="flex-shrink-0 flex items-center gap-2">
                             ${canManage ? `
@@ -461,7 +464,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                 ].map(([label, val]) => `
                                             <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                                                 <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">${label}</div>
-                                                <div class="text-xs font-semibold text-gray-800 leading-snug">${val ?? '—'}</div>
+                                                <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(val ?? '—')}</div>
                                             </div>`).join('')}
                             </div>
                             <div class="mt-2 flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2">
@@ -479,11 +482,11 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                             <div class="grid grid-cols-2 gap-2">
                                 <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                                     <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Group</div>
-                                    <div class="text-xs font-semibold text-gray-800">${data.data.atribut.group ?? '—'}</div>
+                                    <div class="text-xs font-semibold text-gray-800">${esc(data.data.atribut.group ?? '—')}</div>
                                 </div>
                                 <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                                     <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Perusahaan</div>
-                                    <div class="text-xs font-semibold text-gray-800 leading-snug">${data.data.atribut.perusahaan ?? '—'}</div>
+                                    <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.atribut.perusahaan ?? '—')}</div>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2 mt-2">
@@ -503,11 +506,11 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                         <div class="space-y-4">
                             <div>
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Deskripsi Konflik</p>
-                                <p class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${data.data.deskripsi.konflik ?? '—'}</p>
+                                <p class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${esc(data.data.deskripsi.konflik ?? '—')}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Deskripsi Perjuangan</p>
-                                <p class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${data.data.deskripsi.perjuangan ?? '—'}</p>
+                                <p class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${esc(data.data.deskripsi.perjuangan ?? '—')}</p>
                             </div>
                         </div>
 
@@ -515,7 +518,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
 
                         <div>
                             <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Lembaga Pendamping</p>
-                            <p class="text-xs text-gray-700 leading-relaxed">${data.data.lembaga ?? '—'}</p>
+                            <p class="text-xs text-gray-700 leading-relaxed">${esc(data.data.lembaga ?? '—')}</p>
                         </div>
 
                     </div>
@@ -571,7 +574,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
 
                                         ${
                                             item.gambar
-                                            ? `<img src="/storage/${item.gambar}"
+                                            ? `<img src="/storage/${esc(item.gambar)}"
                                                             class="w-full h-44 object-cover">`
                                             : `<div class="w-full h-44 bg-gray-100 flex items-center justify-center text-gray-300 text-xs">
                                                         Tidak ada gambar
@@ -580,19 +583,19 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
 
                                         <div class="p-4 space-y-2">
                                             <p class="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">
-                                                ${item.judul_id}
+                                                ${esc(item.judul_id)}
                                             </p>
 
                                             ${
                                                 item.deskripsi_id
                                                 ? `<p class="text-xs text-gray-500 line-clamp-3 leading-relaxed">
-                                                        ${item.deskripsi_id}
+                                                        ${esc(item.deskripsi_id)}
                                                     </p>`
                                                 : ''
                                             }
 
                                             <p class="text-[10px] text-gray-400 pt-1">
-                                                ${item.tanggal_publish ?? '-'}
+                                                ${esc(item.tanggal_publish ?? '-')}
                                             </p>
                                         </div>
 

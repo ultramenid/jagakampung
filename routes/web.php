@@ -37,9 +37,6 @@ Route::get("/cms/rest-map/{id}", [
     "kasusDetail",
 ]);
 
-Route::get("rest-map", [LocalServiceController::class, "index"]);
-Route::get("rest-map/{id}", [LocalServiceController::class, "kasusDetail"]);
-
 //redirect to login page if user has no session
 Route::middleware([checkSession::class])->group(function () {
     // Any authenticated user: dashboard + their own konflik/artikel

@@ -113,10 +113,15 @@ class ApiTest extends TestCase
             ['provinsi' => 'A', 'kabkota' => 'B', 'kecamatan' => 'C', 'desa' => 'D3', 'lat' => '-7.3', 'long' => '112.3', 'luas' => 30, 'kk' => 15, 'group' => 'G', 'perusahaan' => 'P3', 'status' => 'potensi', 'deskripsikonflik' => 'T3', 'deskripsiperjuangan' => 'T3', 'user_id' => 1],
         ]);
 
+        // C1 fix: an unauthenticated caller must NOT see draft konflik —
+        // only the 2 non-draft (aktif + potensi) are returned. An admin
+        // (role 0) would see all 3.
         $response = $this->get('/cms/rest-map');
         $data = json_decode($response->getContent(), true);
 
-        $this->assertCount(3, $data['features']);
+        $this->assertCount(2, $data['features']);
+        $returnedDesa = array_column(array_column($data['features'], 'properties'), 'desa');
+        $this->assertNotContains('D2', $returnedDesa, 'draft konflik must not leak to anonymous');
     }
 
     public function test_rest_map_includes_all_required_properties(): void

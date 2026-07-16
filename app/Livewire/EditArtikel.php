@@ -88,7 +88,7 @@ class EditArtikel extends Component
                     'updated_at' => now(),
                 ];
 
-                if (session('role_id') === 0) {
+                if ((int) session('role_id') === 0) {
                     $updateData['status'] = $this->status;
                 }
 

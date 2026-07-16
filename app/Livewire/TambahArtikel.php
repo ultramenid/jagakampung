@@ -25,7 +25,7 @@ class TambahArtikel extends Component
     public function mount($id)
     {
         $this->konflik_id = $id;
-        $this->status = session('role_id') === 0 ? 'draft' : 'draft';
+        $this->status = 'draft';
     }
 
     // simpan ke database 
@@ -58,6 +58,10 @@ class TambahArtikel extends Component
         }
 
         if($this->manualValidation()) {
+            $status = in_array($this->status, ['draft', 'publish'], true) ? $this->status : 'draft';
+            if ((int) session('role_id') !== 0) {
+                $status = 'draft';
+            }
             DB::table('artikel')->insert([
                 'konflik_id' => $this->konflik_id,
                 'judul_id' => $this->judul_id,
@@ -67,7 +71,7 @@ class TambahArtikel extends Component
                 'deskripsi_en' => $this->deskripsi_en ?? 'desk_en',
                 'gambar' => $gambarPath,
                 'sumber' => $this->sumber,
-                'status' => $this->status ?? 'draft',
+                'status' => $status,
                 'tanggal_publish' => Carbon::parse($this->tanggal_publish)->format('Y-m-d'),
                 'created_at' => Carbon::now('Asia/Jakarta'),
             ]);

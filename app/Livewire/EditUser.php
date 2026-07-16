@@ -24,12 +24,15 @@ class EditUser extends Component
     }
 
     public function storeDatabase(){
+        if ((int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         if($this->manualValidation()){
             $updateData = [
                 'name' => $this->name,
                 'email' => $this->email,
                 'instansi' => $this->instansi,
-                'role' => $this->role,
+                'role' => in_array((string) $this->role, ['0', '1'], true) ? (int) $this->role : 1, // ponytail: whitelist role (cast to string: mount loads int from DB, select sends string), default to User
             ];
 
             if($this->password){

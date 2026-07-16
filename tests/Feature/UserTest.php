@@ -247,6 +247,8 @@ class UserTest extends TestCase
         Livewire::test(\App\Livewire\CmsUsers::class)
             ->call('deleting', $adminId);
 
-        $this->assertDatabaseMissing('users', ['id' => $adminId]);
+        // Self-deletion is intentionally blocked (CmsUsers::deleting guards
+        // id === session('id')), so the admin's own account must still exist.
+        $this->assertDatabaseHas('users', ['id' => $adminId]);
     }
 }

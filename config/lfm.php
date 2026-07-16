@@ -15,7 +15,7 @@ return [
     |--------------------------------------------------------------------------
      */
 
-    'use_package_routes'       => true,
+    'use_package_routes'       => false,
 
     //Middlewares to be applied to default routes when use_package_routes is true
     'middlewares'              => ['web','auth'],
@@ -55,7 +55,7 @@ return [
         'file'  => [
             'folder_name'  => 'files',
             'startup_view' => 'list',
-            'max_size'     => 50000, // size in KB
+            'max_size'     => 5120, // size in KB
             'thumb' => true,
             'thumb_width' => 80,
             'thumb_height' => 80,
@@ -65,13 +65,12 @@ return [
                 'image/png',
                 'image/gif',
                 'application/pdf',
-                'text/plain',
             ],
         ],
         'image' => [
             'folder_name'  => 'photos',
             'startup_view' => 'grid',
-            'max_size'     => 50000, // size in KB
+            'max_size'     => 5120, // size in KB
             'thumb' => true,
             'thumb_width' => 80,
             'thumb_height' => 80,
@@ -108,7 +107,7 @@ return [
 
     'rename_duplicates'        => false,
 
-    'alphanumeric_filename'    => false,
+    'alphanumeric_filename'    => true,
 
     'alphanumeric_directory'   => false,
 

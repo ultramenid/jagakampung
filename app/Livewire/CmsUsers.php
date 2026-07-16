@@ -14,9 +14,14 @@ class CmsUsers extends Component
     public $dataField = 'name', $dataOrder = 'asc', $paginate = 10, $search = '';
 
     public function getUsers(){
+        // ponytail: whitelist sort column + clamp direction to prevent row-ordering disclosure via Livewire payload tampering
+        $allowedFields = ['id', 'name', 'email', 'instansi', 'role'];
+        $field = in_array($this->dataField, $allowedFields, true) ? $this->dataField : 'name';
+        $order = strtolower($this->dataOrder) === 'desc' ? 'desc' : 'asc';
+
         return DB::table('users')
             ->where('name', 'like', '%'.$this->search.'%')
-            ->orderBy($this->dataField, $this->dataOrder)
+            ->orderBy($field, $order)
             ->paginate($this->paginate);
     }
     public function sortingField($field){

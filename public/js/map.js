@@ -22,6 +22,9 @@ const markersByCoord = {};
 // ID konflik yang sedang dipilih/fokus, untuk membesarkan marker-nya di peta
 let selectedKonflikId = null;
 
+// HTML-escape helper for DB-derived strings interpolated into innerHTML
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
 // SIDEBAR
 const sidebar = document.getElementById("sidebar");
 const sidebarContent = document.getElementById("sidebarContent");
@@ -159,16 +162,9 @@ if (typeof L.bmSwitcher !== "undefined") {
 
 // WMS LAYERS
 const wmsLayers = {
-    deforestasi2023: "simontini:Auriga - Deforestasi 2023",
-    deforestasi2024: "simontini:ID_STADI24_CEA",
+
     kawasanhutan: "simontini:Forest_estate_adm",
-    hutanalam: "simontini:Hutan_Alam_adm",
-    kantonghabitat: "simontini:KantongGajah2018RTM",
-    hgu: "kpa:HGU_BPN_2019",
-    // adminkabkota: 'administrative_boundaries',
-    potensiminerba: "tiger:Geologi 100K Selected",
     pbph: "simontini:PBPH_AR_50K_DESEMBER_2023",
-    iup: "simontini:mining_concession_2025_01_27",
 };
 
 const layers = {};
@@ -221,8 +217,8 @@ function renderMedia(data) {
         ${images
             .map(
                 (img) => `
-            <a href="/storage/gambar/${img}" class="glightbox group relative block overflow-hidden rounded-xl border border-gray-100">
-                <img src="/storage/gambar/${img}" class="w-full h-36 object-cover transition duration-300 group-hover:scale-105" alt="${img}">
+            <a href="/storage/gambar/${esc(img)}" class="glightbox group relative block overflow-hidden rounded-xl border border-gray-100">
+                <img src="/storage/gambar/${esc(img)}" class="w-full h-36 object-cover transition duration-300 group-hover:scale-105" alt="${esc(img)}">
                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition duration-300 flex items-center justify-center">
                     <div class="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
@@ -259,13 +255,13 @@ function renderLampiran(data) {
             .map((item) => {
                 const ext = (item.file.split(".").pop() || "").toUpperCase();
                 const c = extColors[ext] ?? { bg: "#f3f4f6", text: "#374151" };
-                return `<a href="/storage/lampiran/${item.file}" target="_blank"
+                return `<a href="/storage/lampiran/${esc(item.file)}" target="_blank"
                 class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition group">
                 <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold"
                     style="background:${c.bg};color:${c.text};">${ext || "FILE"}</div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-xs font-semibold text-gray-800 truncate">${item.nama ?? item.file}</div>
-                    <div class="text-[10px] text-gray-400 truncate mt-0.5">${item.file}</div>
+                    <div class="text-xs font-semibold text-gray-800 truncate">${esc(item.nama ?? item.file)}</div>
+                    <div class="text-[10px] text-gray-400 truncate mt-0.5">${esc(item.file)}</div>
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-300 group-hover:text-gray-500 flex-shrink-0 transition" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
@@ -312,10 +308,10 @@ function renderSidebar(data) {
                         <span style="background:${c.bg};color:${c.text};"
                               class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex-shrink-0">
                             <span style="width:5px;height:5px;border-radius:50%;background:${c.dot};display:inline-block;flex-shrink:0;"></span>
-                            ${status}
+                            ${esc(status)}
                         </span>
                     </div>
-                    <p class="text-[11px] text-gray-400 truncate">${data.data.lokasi.provinsi} &mdash; ${data.data.lokasi.kabkota}</p>
+                    <p class="text-[11px] text-gray-400 truncate">${esc(data.data.lokasi.provinsi)} &mdash; ${esc(data.data.lokasi.kabkota)}</p>
                 </div>
             </div>
 
@@ -363,7 +359,7 @@ function renderSidebar(data) {
                                 ([label, val]) => `
                             <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                                 <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">${label}</div>
-                                <div class="text-xs font-semibold text-gray-800 leading-snug">${val ?? "—"}</div>
+                                <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(val ?? "—")}</div>
                             </div>`,
                             )
                             .join("")}
@@ -383,11 +379,11 @@ function renderSidebar(data) {
                     <div class="grid grid-cols-2 gap-2">
                         <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                             <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Group</div>
-                            <div class="text-xs font-semibold text-gray-800">${data.data.atribut.group ?? "—"}</div>
+                            <div class="text-xs font-semibold text-gray-800">${esc(data.data.atribut.group ?? "—")}</div>
                         </div>
                         <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                             <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Perusahaan</div>
-                            <div class="text-xs font-semibold text-gray-800 leading-snug">${data.data.atribut.perusahaan ?? "—"}</div>
+                            <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.atribut.perusahaan ?? "—")}</div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 mt-2">
@@ -408,11 +404,11 @@ function renderSidebar(data) {
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Deskripsi</p>
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                         <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Deskripsi Konflik</div>
-                        <div class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${data.data.deskripsi.konflik ?? "—"}</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${esc(data.data.deskripsi.konflik ?? "—")}</div>
                     </div>
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                         <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Deskripsi Perjuangan</div>
-                        <div class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${data.data.deskripsi.perjuangan ?? "—"}</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${esc(data.data.deskripsi.perjuangan ?? "—")}</div>
                     </div>
                 </div>
 
@@ -422,7 +418,7 @@ function renderSidebar(data) {
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Instansi</p>
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                         <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Lembaga Pendamping</div>
-                        <div class="text-xs font-semibold text-gray-800 leading-snug">${data.data.lembaga ?? "—"}</div>
+                        <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.lembaga ?? "—")}</div>
                     </div>
                 </div>
             </div>
@@ -443,32 +439,32 @@ function renderSidebar(data) {
                     .map(
                         (item) => `
 
-                <a href="${item.sumber ?? "#"}"
+                <a href="${esc(item.sumber ?? "#")}"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="block border border-gray-100 rounded-xl overflow-hidden hover:border-gray-300 hover:bg-gray-50 transition">
 
                     ${
                         item.gambar
-                            ? `<img src="/storage/${item.gambar}" class="w-full h-44 object-cover">`
+                            ? `<img src="/storage/${esc(item.gambar)}" class="w-full h-44 object-cover">`
                             : `<div class="w-full h-44 bg-gray-100 flex items-center justify-center text-gray-300 text-xs">Tidak ada gambar</div>`
                     }
 
                     <div class="p-4 space-y-2">
                         <p class="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">
-                            ${item.judul_id}
+                            ${esc(item.judul_id)}
                         </p>
 
                         ${
                             item.deskripsi_id
                                 ? `<p class="text-xs text-gray-500 line-clamp-3 leading-relaxed">
-                                ${item.deskripsi_id}
+                                ${esc(item.deskripsi_id)}
                             </p>`
                                 : ""
                         }
 
                         <p class="text-[10px] text-gray-400 pt-1">
-                            ${item.tanggal_publish ?? "-"}
+                            ${esc(item.tanggal_publish ?? "-")}
                         </p>
                     </div>
 
@@ -690,11 +686,11 @@ function showClusterKonflikList(clusterMarkers, originalLat, originalLng) {
                         <span class="min-w-0 flex-1">
                             <span class="flex items-baseline justify-between gap-2">
                                 <span class="text-[13px] font-medium text-gray-900 truncate group-hover:text-gray-950">
-                                    ${m.desa || m.kecamatan || m.kabkota || "Tanpa nama"}
+                                    ${esc(m.desa || m.kecamatan || m.kabkota || "Tanpa nama")}
                                 </span>
-                                <span class="font-mono text-[9px] uppercase tracking-wider flex-shrink-0 ${isAktif ? "text-status-aktif" : "text-status-potensi"}">${m.status}</span>
+                                <span class="font-mono text-[9px] uppercase tracking-wider flex-shrink-0 ${isAktif ? "text-status-aktif" : "text-status-potensi"}">${esc(m.status)}</span>
                             </span>
-                            <span class="block text-[11px] text-gray-400 truncate">${m.kabkota || ""}${m.provinsi ? ", " + m.provinsi : ""}</span>
+                            <span class="block text-[11px] text-gray-400 truncate">${esc(m.kabkota || "")}${m.provinsi ? ", " + esc(m.provinsi) : ""}</span>
                             <span class="block mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
                                 ${Number(m.luas || 0).toLocaleString("id-ID")} ha · ${Number(m.kk || 0).toLocaleString("id-ID")} KK
                             </span>
