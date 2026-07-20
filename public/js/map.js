@@ -24,6 +24,8 @@ let selectedKonflikId = null;
 
 // HTML-escape helper for DB-derived strings interpolated into innerHTML
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Format integer with thousands separators (id-ID, matches the case-list format).
+const fmtNum = (n) => (n !== null && n !== undefined && n !== '' && !isNaN(Number(n))) ? Number(n).toLocaleString('id-ID') : '—';
 
 // SIDEBAR
 const sidebar = document.getElementById("sidebar");
@@ -93,6 +95,7 @@ window.focusKonflik = function (id, lat, lng, skipClusterCheck) {
                 provinsi: m.data.provinsi,
                 luas: m.data.luas,
                 kk: m.data.kk,
+                jiwa: m.data.jiwa,
             }));
 
             map.setView([lat, lng], 18, { animate: true });
@@ -524,20 +527,18 @@ function renderSidebar(data) {
                             <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.atribut.perusahaan ?? "—")}</div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-                        <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Luas Ha</div>
-                            <div class="text-xs font-semibold text-gray-800">${data.data.atribut.luas != null ? Number(data.data.atribut.luas) : "—"}</div>
+                    <div class="grid grid-cols-3 gap-2 mt-2">
+                        <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Luas (Ha)</div>
+                            <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.luas)}</div>
                         </div>
-                        <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">KK</div>
-                            <div class="text-xs font-semibold text-gray-800 leading-snug">${data.data.atribut.kk ?? "—"}</div>
+                        <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">KK</div>
+                            <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.kk)}</div>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-                        <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Jumlah Jiwa Berkonflik</div>
-                            <div class="text-xs font-semibold text-gray-800">${data.data.atribut.jiwa != null ? Number(data.data.atribut.jiwa) : "—"}</div>
+                        <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Jiwa</div>
+                            <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.jiwa)}</div>
                         </div>
                     </div>
                 </div>
@@ -836,7 +837,7 @@ function showClusterKonflikList(clusterMarkers, originalLat, originalLng) {
                             </span>
                             <span class="block text-[11px] text-gray-400 truncate">${esc(m.kabkota || "")}${m.provinsi ? ", " + esc(m.provinsi) : ""}</span>
                             <span class="block mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
-                                ${Number(m.luas || 0).toLocaleString("id-ID")} ha · ${Number(m.kk || 0).toLocaleString("id-ID")} KK
+                                ${Number(m.luas || 0).toLocaleString("id-ID")} ha · ${Number(m.kk || 0).toLocaleString("id-ID")} KK · ${Number(m.jiwa || 0).toLocaleString("id-ID")} jiwa
                             </span>
                         </span>
                     </button>
@@ -975,6 +976,7 @@ fetch("/cms/rest-map/")
             marker.data.provinsi = item.properties.provinsi;
             marker.data.luas = item.properties.luas;
             marker.data.kk = item.properties.kk;
+            marker.data.jiwa = item.properties.jiwa;
 
             pruneCluster.RegisterMarker(marker);
 
@@ -1021,6 +1023,7 @@ fetch("/cms/rest-map/")
                 provinsi: m.data.provinsi,
                 luas: m.data.luas,
                 kk: m.data.kk,
+                jiwa: m.data.jiwa,
             }));
 
             if (clusterConflicts.length > 1) {
