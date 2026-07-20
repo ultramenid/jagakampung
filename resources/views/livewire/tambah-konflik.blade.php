@@ -142,7 +142,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                         <div>
                             <label for="tk-luas" class="gk-label">Luas <span class="text-gray-400 font-normal normal-case">(ha)</span></label>
                             <input id="tk-luas" placeholder="0.00" type="number" wire:model="luas" class="gk-input gk-mono" />
@@ -150,6 +150,10 @@
                         <div>
                             <label for="tk-kk" class="gk-label">Jumlah KK <span class="text-gray-400 font-normal">(opsional)</span></label>
                             <input id="tk-kk" placeholder="0" type="number" wire:model="kk" class="gk-input gk-mono" />
+                        </div>
+                        <div>
+                            <label for="tk-jiwa" class="gk-label">Jumlah Jiwa Berkonflik</label>
+                            <input id="tk-jiwa" placeholder="0" type="number" wire:model="jiwa" class="gk-input gk-mono" />
                         </div>
                         <div>
                             <label for="tk-status" class="gk-label">Status</label>

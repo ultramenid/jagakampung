@@ -53,6 +53,8 @@ class TambahKonflik extends Component
 
     public $kk;
 
+    public $jiwa;
+
     public $deskripsikonflik;
 
     public $deskripsiperjuangan;
@@ -149,6 +151,7 @@ class TambahKonflik extends Component
                 'group' => $this->selectedGroup,
                 'perusahaan' => $this->selectedPerusahaan,
                 'kk' => $this->kk === '' ? null : $this->kk,
+                'jiwa' => $this->jiwa === '' ? null : $this->jiwa,
                 'status' => $this->selectedStatus,
                 'deskripsikonflik' => $this->deskripsikonflik,
                 'deskripsiperjuangan' => $this->deskripsiperjuangan,

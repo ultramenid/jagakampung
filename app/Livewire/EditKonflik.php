@@ -24,7 +24,7 @@ class EditKonflik extends Component
     public $namalampiran;
     public $filelampiran;
     public $editIndex = null;
-    public $luas, $kk, $deskripsikonflik, $deskripsiperjuangan;
+    public $luas, $kk, $jiwa, $deskripsikonflik, $deskripsiperjuangan;
     public $provinsi,
         $kabkota,
         $kecamatan,
@@ -57,6 +57,7 @@ class EditKonflik extends Component
         $this->longtitude = $data->long;
         $this->luas = (float) $data->luas;
         $this->kk = $data->kk;
+        $this->jiwa = $data->jiwa;
         $this->deskripsikonflik = $data->deskripsikonflik;
         $this->deskripsiperjuangan = $data->deskripsiperjuangan;
         $this->selectedStatus = $data->status;
@@ -161,6 +162,7 @@ class EditKonflik extends Component
                     "group" => $this->selectedGroup,
                     "perusahaan" => $this->selectedPerusahaan,
                     "kk" => $this->kk === "" ? null : $this->kk,
+                    "jiwa" => $this->jiwa === "" ? null : $this->jiwa,
                     "deskripsikonflik" => $this->deskripsikonflik,
                     "deskripsiperjuangan" => $this->deskripsiperjuangan,
                     "status" => $this->selectedStatus,
@@ -357,6 +359,15 @@ class EditKonflik extends Component
 
         $this->resetForm();
         $this->dispatch("close-form");
+    }
+
+    public function setLembaga($lembaga)
+    {
+        if (!in_array($lembaga, $this->lembagas)) {
+            array_push($this->lembagas, $lembaga);
+        }
+        $this->chooselembaga = $lembaga;
+        $this->lembaga = "";
     }
 
     public function deleteTags($id)

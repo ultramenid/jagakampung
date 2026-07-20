@@ -9,7 +9,7 @@ class LocalServiceController extends Controller
 {
     public function index(){
         $query = DB::table('konflik')
-            ->select('id', 'lat', 'long', 'status', 'user_id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'luas', 'kk', 'group', 'perusahaan');
+            ->select('id', 'lat', 'long', 'status', 'user_id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'luas', 'kk', 'jiwa', 'group', 'perusahaan');
 
         // pengguna non-admin tidak boleh melihat konflik berstatus draft milik orang lain
         if (session('role_id') === null || (int) session('role_id') !== 0) {
@@ -44,6 +44,7 @@ class LocalServiceController extends Controller
                             'provinsi' => $value['provinsi'],
                             'luas' => $value['luas'],
                             'kk' => $value['kk'],
+                            'jiwa' => $value['jiwa'],
                             'group' => $value['group'],
                             'perusahaan' => $value['perusahaan'],
                         ),
@@ -100,6 +101,7 @@ class LocalServiceController extends Controller
                 'atribut' => [
                     'luas' => $data->luas,
                     'kk' => $data->kk,
+                    'jiwa' => $data->jiwa,
                     'status' => $data->status,
                     'group' => $data->group,
                     'perusahaan' => $data->perusahaan,
