@@ -115,7 +115,7 @@
                     <input placeholder="0.00" type="number" wire:model="luas" class="gk-input gk-mono" />
                 </div>
                 <div>
-                    <label class="gk-label">Jumlah KK</label>
+                    <label class="gk-label">Jumlah KK <span class="text-gray-400 font-normal">(opsional)</span></label>
                     <input placeholder="0" type="number" wire:model="kk" class="gk-input gk-mono" />
                 </div>
                 <div>

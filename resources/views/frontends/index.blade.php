@@ -99,7 +99,7 @@
                                 </span>
                                 <span class="block text-[11px] text-gray-400 truncate">{{ $k->kabkota }}{{ $k->provinsi ? ', '.$k->provinsi : '' }}</span>
                                 <span class="block mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
-                                    {{ number_format($k->luas, 0, '.', ',') }} ha · {{ number_format($k->kk, 0, '.', ',') }} KK
+                                    {{ number_format($k->luas, 0, '.', ',') }} ha · {{ number_format($k->kk ?? 0, 0, '.', ',') }} KK
                                 </span>
                             </span>
                         </button>

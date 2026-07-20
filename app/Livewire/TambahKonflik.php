@@ -91,10 +91,6 @@ class TambahKonflik extends Component
             Toaster::error('Silahkan isi luas konflik!');
 
             return false;
-        } elseif ($this->kk == '') {
-            Toaster::error('Silahkan isi jumlah KK konflik!');
-
-            return false;
         } elseif ($this->selectedStatus == '') {
             Toaster::error('Silahkan pilih status konflik!');
 
@@ -152,7 +148,7 @@ class TambahKonflik extends Component
                 'luas' => $this->luas,
                 'group' => $this->selectedGroup,
                 'perusahaan' => $this->selectedPerusahaan,
-                'kk' => $this->kk,
+                'kk' => $this->kk === '' ? null : $this->kk,
                 'status' => $this->selectedStatus,
                 'deskripsikonflik' => $this->deskripsikonflik,
                 'deskripsiperjuangan' => $this->deskripsiperjuangan,

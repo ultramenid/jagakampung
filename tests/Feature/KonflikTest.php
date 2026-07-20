@@ -170,11 +170,14 @@ class KonflikTest extends TestCase
             ->assertNoRedirect();
     }
 
-    public function test_konflik_validation_kk_required(): void
+    public function test_konflik_kk_is_optional(): void
     {
         $this->loginAsAdmin();
 
         Livewire::test(\App\Livewire\TambahKonflik::class)
+            ->set('provinsi', 'Jawa Timur')
+            ->set('kabkota', 'Surabaya')
+            ->set('kecamatan', 'Tegalsari')
             ->set('desa', 'Test Desa')
             ->set('latitude', '-7.250')
             ->set('longtitude', '112.750')
@@ -186,7 +189,12 @@ class KonflikTest extends TestCase
             ->set('deskripsikonflik', 'Test')
             ->set('deskripsiperjuangan', 'Test')
             ->call('storeDatabase')
-            ->assertNoRedirect();
+            ->assertRedirect('/cms/konflik');
+
+        $this->assertDatabaseHas('konflik', [
+            'desa' => 'Test Desa',
+            'kk' => null,
+        ]);
     }
 
     public function test_konflik_validation_status_required(): void

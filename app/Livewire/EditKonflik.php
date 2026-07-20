@@ -103,9 +103,6 @@ class EditKonflik extends Component
         } elseif ($this->luas == "") {
             Toaster::error("Silahkan isi luas konflik!");
             return false;
-        } elseif ($this->kk == "") {
-            Toaster::error("Silahkan isi jumlah KK konflik!");
-            return false;
         } elseif ($this->selectedStatus == "") {
             Toaster::error("Silahkan pilih status konflik!");
             return false;
@@ -163,7 +160,7 @@ class EditKonflik extends Component
                     "luas" => $this->luas,
                     "group" => $this->selectedGroup,
                     "perusahaan" => $this->selectedPerusahaan,
-                    "kk" => $this->kk,
+                    "kk" => $this->kk === "" ? null : $this->kk,
                     "deskripsikonflik" => $this->deskripsikonflik,
                     "deskripsiperjuangan" => $this->deskripsiperjuangan,
                     "status" => $this->selectedStatus,

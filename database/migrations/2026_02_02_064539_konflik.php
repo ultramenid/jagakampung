@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('lat');
             $table->string('long');
             $table->integer('luas');
-            $table->integer('kk');
+            $table->integer('kk')->nullable();
             $table->string('group');
             $table->string('perusahaan');
             $table->string('status');
