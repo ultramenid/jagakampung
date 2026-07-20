@@ -278,6 +278,8 @@
 
                         // HTML-escape helper for DB-derived strings interpolated into innerHTML
                         const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+                        // Format integer with thousands separators (matches table view's number_format(_,0,'.',',')).
+                        const fmtNum = (n) => (n !== null && n !== undefined && n !== '' && !isNaN(Number(n))) ? Number(n).toLocaleString('en-US') : '—';
 
                         window.openSidebar = function() {
                             sidebar.style.transform = 'translateX(0)';
@@ -695,20 +697,18 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                     <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.atribut.perusahaan ?? '—')}</div>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 mt-2">
-                                <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Luas Ha</div>
-                                    <div class="text-xs font-semibold text-gray-800">${data.data.atribut.luas != null ? Number(data.data.atribut.luas) : '—'}</div>
+                            <div class="grid grid-cols-3 gap-2 mt-2">
+                                <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Luas (Ha)</div>
+                                    <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.luas)}</div>
                                 </div>
-                                <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">KK</div>
-                                    <div class="text-xs font-semibold text-gray-800 leading-snug">${data.data.atribut.kk ?? '—'}</div>
+                                <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">KK</div>
+                                    <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.kk)}</div>
                                 </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 mt-2">
-                                <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Jumlah Jiwa Berkonflik</div>
-                                    <div class="text-xs font-semibold text-gray-800">${data.data.atribut.jiwa != null ? Number(data.data.atribut.jiwa) : '—'}</div>
+                                <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Jiwa</div>
+                                    <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.jiwa)}</div>
                                 </div>
                             </div>
                         </div>
