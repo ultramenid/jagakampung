@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ view: @entangle('viewMode') }">
 
     {{-- Floating Add Button --}}
     <a href="{{ url('/cms/tambah-konflik') }}"
@@ -10,6 +10,30 @@
         </svg>
         Tambah Konflik
     </a>
+
+    {{-- MAP VIEW --}}
+    <div x-show="view === 'map'" x-cloak
+        x-effect="if (view === 'map' && window.__map) { setTimeout(() => window.__map.invalidateSize(), 50) }">
+
+    {{-- View Toggle (on map) --}}
+    <div class="fixed z-20 top-20 left-1/2 -translate-x-1/2 flex items-center bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-geist select-none">
+        <button wire:click="$set('viewMode', 'map')" @click="view = 'map'"
+            :class="view === 'map' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            Peta
+        </button>
+        <button wire:click="$set('viewMode', 'table')" @click="view = 'table'"
+            :class="view === 'table' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            Tabel
+        </button>
+    </div>
 
     <div role="group" aria-label="Legenda status konflik"
         class="fixed z-20 bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2.5 shadow-geist font-mono text-[11px] uppercase tracking-wider text-gray-600 select-none">
@@ -93,7 +117,109 @@
         </div>
     </div>
 
+    </div> {{-- end MAP VIEW --}}
 
+    {{-- TABLE VIEW --}}
+    <div x-show="view === 'table'" x-cloak class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-lg font-semibold text-gray-900">Daftar Konflik</h1>
+                <p class="text-sm text-gray-500 mt-0.5">Kelola data konflik agraria</p>
+            </div>
+            <button wire:click="$set('viewMode', 'map')" @click="view = 'map'"
+                class="gk-btn-secondary gk-btn-sm">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                Lihat Peta
+            </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+            <div class="flex-1 sm:flex-none">
+                <input wire:model.live.debounce.300ms="search" type="search" placeholder="Cari desa, kecamatan, grup…" class="gk-input sm:w-72">
+            </div>
+            <div>
+                <select wire:model.live="filterStatus" class="gk-select sm:w-40">
+                    <option value="">Semua Status</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="potensi">Potensi</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="gk-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-100">
+                            <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Status</th>
+                            <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Desa</th>
+                            <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Kecamatan</th>
+                            <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Kab/Kota</th>
+                            <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Group</th>
+                            <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Perusahaan</th>
+                            <th class="text-right px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Luas</th>
+                            <th class="text-right px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">KK</th>
+                            <th class="text-right px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Jiwa</th>
+                            <th class="px-4 py-2.5"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($databases as $item)
+                            @php
+                                $statusColors = [
+                                    'aktif' => ['bg' => 'bg-red-50', 'text' => 'text-red-700', 'dot' => 'bg-red-500'],
+                                    'potensi' => ['bg' => 'bg-sky-50', 'text' => 'text-sky-700', 'dot' => 'bg-sky-500'],
+                                    'draft' => ['bg' => 'bg-stone-100', 'text' => 'text-stone-600', 'dot' => 'bg-stone-400'],
+                                ];
+                                $sc = $statusColors[$item->status] ?? $statusColors['draft'];
+                            @endphp
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full {{ $sc['bg'] }} {{ $sc['text'] }}">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $sc['dot'] }}"></span>
+                                        {{ $item->status }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 font-medium text-gray-900">{{ $item->desa }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ $item->kecamatan }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ $item->kabkota }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ $item->group }}</td>
+                                <td class="px-4 py-3 text-gray-600 max-w-[200px] truncate">{{ $item->perusahaan }}</td>
+                                <td class="px-4 py-3 text-right font-mono text-gray-900 tabular-nums">{{ $item->luas ? number_format($item->luas, 0, '.', ',') : '—' }}</td>
+                                <td class="px-4 py-3 text-right font-mono text-gray-900 tabular-nums">{{ $item->kk ?? '—' }}</td>
+                                <td class="px-4 py-3 text-right font-mono text-gray-900 tabular-nums">{{ $item->jiwa ?? '—' }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end gap-2">
+                                        @if ((int) session('role_id') === 0 || (int) ($item->user_id ?? 0) === (int) session('id'))
+                                            <a href="/cms/edit-konflik/{{ $item->id }}" class="gk-btn-secondary gk-btn-sm">Edit</a>
+                                        @endif
+                                        @if ((int) session('role_id') === 0)
+                                            <button onclick="deleteKonflik({{ $item->id }})" type="button" class="gk-btn-danger gk-btn-sm">Hapus</button>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="px-4 py-12 text-center text-sm text-gray-500">Tidak ada data konflik</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if ($databases->hasPages())
+            <div class="mt-4">
+                {{ $databases->links() }}
+            </div>
+        @endif
+    </div>
+
+    </div> {{-- end x-data --}}
 
     @push('scripts')
         <script>
@@ -174,6 +300,8 @@
                             attribution: 'Auriga | Jagakampung',
                             minZoom: 5,
                         }).addTo(map);
+
+                        window.__map = map;
 
                         // ── Cluster icon ──────────────────────────────────────────────────────
                         pruneCluster.BuildLeafletClusterIcon = function(cluster) {
