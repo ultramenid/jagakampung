@@ -527,18 +527,29 @@ function renderSidebar(data) {
                             <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.atribut.perusahaan ?? "—")}</div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 mt-2">
-                        <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Luas (Ha)</div>
-                            <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.luas)}</div>
+
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 mt-4">Dampak</p>
+                    <div class="bg-gray-50 rounded-xl px-3.5 py-3">
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="font-mono text-xl font-semibold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.luas)}</span>
+                            <span class="font-mono text-[11px] font-medium text-gray-400">ha</span>
                         </div>
-                        <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">KK</div>
-                            <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.kk)}</div>
+                        <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Luas lahan sengketa</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-0 mt-2 rounded-xl bg-gray-50 overflow-hidden">
+                        <div class="px-3.5 py-3">
+                            <div class="flex items-baseline gap-1">
+                                <span class="font-mono text-base font-semibold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.kk)}</span>
+                                <span class="font-mono text-[10px] font-medium text-gray-400">KK</span>
+                            </div>
+                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Kepala keluarga terdampak</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
-                            <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Jiwa</div>
-                            <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.jiwa)}</div>
+                        <div class="px-3.5 py-3 border-l border-gray-100">
+                            <div class="flex items-baseline gap-1">
+                                <span class="font-mono text-base font-semibold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.jiwa)}</span>
+                                <span class="font-mono text-[10px] font-medium text-gray-400">jiwa</span>
+                            </div>
+                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Jiwa terdampak</p>
                         </div>
                     </div>
                 </div>
