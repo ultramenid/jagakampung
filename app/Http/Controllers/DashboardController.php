@@ -20,6 +20,7 @@ class DashboardController extends Controller
             'konflik'    => DB::table('konflik')->count(),
             'luas'       => DB::table('konflik')->get()->sum(fn ($r) => round((float) $r->luas)), // hektar terdampak
             'kk'         => (int) DB::table('konflik')->sum('kk'),     // kepala keluarga
+            'jiwa'       => (int) DB::table('konflik')->sum('jiwa'),   // jiwa
             'perusahaan' => DB::table('perusahaans')->count(),
             'instansi'   => DB::table('instansi')->count(),
             'grup'       => DB::table('groups')->count(),
