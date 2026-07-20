@@ -198,17 +198,30 @@
                                     <div style="flex:1;background:var(--color-status-draft);"></div>
                                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
                                 </div>`;
-                            }else if (aktif > 0 && potensi > 0) {
+                            } else if (aktif > 0 && potensi > 0) {
                                 html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
                                     <div style="flex:1;background:var(--color-status-aktif);"></div>
                                     <div style="flex:1;background:var(--color-status-potensi);"></div>
-                                    {{-- <div style="flex:1;background:#605B51;"></div> --}}
+                                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
+                                </div>`;
+                            } else if (aktif > 0) {
+                                html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
+                                    <div style="flex:1;background:var(--color-status-aktif);"></div>
+                                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
+                                </div>`;
+                            } else if (potensi > 0 && draft > 0) {
+                                html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
+                                    <div style="flex:1;background:var(--color-status-potensi);"></div>
+                                    <div style="flex:1;background:var(--color-status-draft);"></div>
+                                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
+                                </div>`;
+                            } else if (potensi > 0) {
+                                html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
+                                    <div style="flex:1;background:var(--color-status-potensi);"></div>
                                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
                                 </div>`;
                             } else {
                                 html = `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.22);display:flex;flex-direction:column;position:relative;font:bold 11px system-ui,sans-serif;">
-                                    {{-- <div style="flex:1;background:#890620;"></div> --}}
-                                    <div style="flex:1;background:var(--color-status-potensi);"></div>
                                     <div style="flex:1;background:var(--color-status-draft);"></div>
                                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${total}</div>
                                 </div>`;
