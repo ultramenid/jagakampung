@@ -228,6 +228,31 @@
         </div>
     </div>
 
+    {{-- Delete confirmation dialog --}}
+    <div id="deleteDialog" x-cloak
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200"
+        onclick="if (event.target === this) closeDeleteDialog()">
+        <div class="relative bg-white rounded-2xl shadow-geist w-full max-w-md p-6">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-semibold text-gray-900">Hapus data konflik?</h3>
+                    <p class="text-sm text-gray-500 mt-1 leading-relaxed">Data yang dihapus tidak dapat dikembalikan. Pastikan Anda yakin sebelum melanjutkan.</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 mt-6">
+                <button type="button" onclick="closeDeleteDialog()"
+                    class="gk-btn-secondary gk-btn-sm">Batal</button>
+                <button type="button" id="deleteDialogConfirm"
+                    class="gk-btn-danger gk-btn-sm">Hapus</button>
+            </div>
+        </div>
+    </div>
+
     </div> {{-- end x-data --}}
 
     @push('scripts')
@@ -282,8 +307,31 @@
                             return params.get('konflik');
                         }
 
-                        window.deleteKonflik = function(id) {
-                            if (!confirm('Hapus data konflik ini? Tindakan ini tidak dapat dibatalkan.')) return;
+                        // ── Delete confirmation dialog ───────────────────────────────────
+                        const deleteDialog = document.getElementById('deleteDialog');
+                        const deleteConfirmBtn = document.getElementById('deleteDialogConfirm');
+                        let pendingDeleteId = null;
+
+                        function setDeleteLoading(loading) {
+                            deleteConfirmBtn.disabled = loading;
+                            deleteConfirmBtn.textContent = loading ? 'Menghapus…' : 'Hapus';
+                        }
+
+                        window.openDeleteDialog = function(id) {
+                            pendingDeleteId = id;
+                            setDeleteLoading(false);
+                            deleteDialog.classList.remove('opacity-0', 'pointer-events-none');
+                        };
+
+                        window.closeDeleteDialog = function() {
+                            deleteDialog.classList.add('opacity-0', 'pointer-events-none');
+                            pendingDeleteId = null;
+                        };
+
+                        deleteConfirmBtn.addEventListener('click', function() {
+                            const id = pendingDeleteId;
+                            if (id == null) return;
+                            setDeleteLoading(true);
                             setSelectedKonflik(null);
                             fetch(`${APP_URL}/cms/konflik/${id}/delete`, {
                                 method: 'POST',
@@ -292,10 +340,18 @@
                             .then(res => res.json().then(body => ({ ok: res.ok, body })))
                             .then(({ ok, body }) => {
                                 if (!ok) throw new Error(body.message || 'Gagal menghapus data');
+                                closeDeleteDialog();
                                 closeSidebar();
                                 location.reload();
                             })
-                            .catch(err => alert(err.message || 'Gagal menghapus data'));
+                            .catch(err => {
+                                closeDeleteDialog();
+                                alert(err.message || 'Gagal menghapus data');
+                            });
+                        });
+
+                        window.deleteKonflik = function(id) {
+                            openDeleteDialog(id);
                         };
 
                         // ── Map ───────────────────────────────────────────────────────────────
