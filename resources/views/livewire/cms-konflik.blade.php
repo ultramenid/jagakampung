@@ -123,7 +123,7 @@
          x-transition.opacity
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
          wire:click="$set('viewMode', 'map')" @click.self="view = 'map'">
-        <div class="relative bg-white rounded-2xl shadow-geist w-full max-w-6xl max-h-[85vh] flex flex-col overflow-hidden"
+        <div class="relative bg-white rounded-2xl shadow-geist w-full max-w-7xl max-h-[92vh] flex flex-col overflow-hidden"
              @click.stop>
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <div>
@@ -155,7 +155,7 @@
                 </div>
             </div>
 
-            <div class="overflow-y-auto p-5">
+            <div class="overflow-y-auto p-4">
             <div class="gk-card overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -184,21 +184,21 @@
                                 $sc = $statusColors[$item->status] ?? $statusColors['draft'];
                             @endphp
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-2">
                                     <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full {{ $sc['bg'] }} {{ $sc['text'] }}">
                                         <span class="w-1.5 h-1.5 rounded-full {{ $sc['dot'] }}"></span>
                                         {{ $item->status }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 font-medium text-gray-900">{{ $item->desa }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $item->kecamatan }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $item->kabkota }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $item->group }}</td>
-                                <td class="px-4 py-3 text-gray-600 max-w-[200px] truncate">{{ $item->perusahaan }}</td>
-                                <td class="px-4 py-3 text-right font-mono text-gray-900 tabular-nums">{{ $item->luas ? number_format($item->luas, 0, '.', ',') : '—' }}</td>
-                                <td class="px-4 py-3 text-right font-mono text-gray-900 tabular-nums">{{ $item->kk ?? '—' }}</td>
-                                <td class="px-4 py-3 text-right font-mono text-gray-900 tabular-nums">{{ $item->jiwa ?? '—' }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-2 font-medium text-gray-900">{{ $item->desa }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $item->kecamatan }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $item->kabkota }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $item->group }}</td>
+                                <td class="px-4 py-2 text-gray-600 max-w-[200px] truncate">{{ $item->perusahaan }}</td>
+                                <td class="px-4 py-2 text-right font-mono text-gray-900 tabular-nums">{{ $item->luas ? number_format($item->luas, 0, '.', ',') : '—' }}</td>
+                                <td class="px-4 py-2 text-right font-mono text-gray-900 tabular-nums">{{ $item->kk ?? '—' }}</td>
+                                <td class="px-4 py-2 text-right font-mono text-gray-900 tabular-nums">{{ $item->jiwa ?? '—' }}</td>
+                                <td class="px-4 py-2">
                                     <div class="flex items-center justify-end gap-2">
                                         @if ((int) session('role_id') === 0 || (int) ($item->user_id ?? 0) === (int) session('id'))
                                             <a href="/cms/edit-konflik/{{ $item->id }}" class="gk-btn-secondary gk-btn-sm">Edit</a>
