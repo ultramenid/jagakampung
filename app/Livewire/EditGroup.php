@@ -59,8 +59,18 @@ class EditGroup extends Component
         }elseif($this->deskripsi == ''){
             Toaster::error('Deskripsi harus diisi!');
             return;
+        }elseif($this->checkNamaExists()){
+            Toaster::error('Nama group sudah ada!');
+            return;
         }
         return true;
+    }
+
+    public function checkNamaExists(){
+        return DB::table('groups')
+            ->where('nama', $this->nama)
+            ->where('id', '!=', $this->idGroup)
+            ->exists();
     }
     public function render()
     {
