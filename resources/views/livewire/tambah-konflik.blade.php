@@ -4,6 +4,8 @@
         @include('partials.deleterModal')
     </div>
 
+    @include('partials.outsidePolygonModal')
+
     <div class="max-w-4xl mx-auto">
 
         {{-- Header --}}
@@ -345,6 +347,8 @@
                 function setMarker(lat, lng) {
                     if (marker) map.removeLayer(marker);
                     marker = L.marker([lat, lng]).addTo(map);
+                    currentLat = lat;
+                    currentLng = lng;
 
                     // sync ke Livewire
                     @this.set('latitude', lat);
@@ -370,6 +374,13 @@
                     } else {
                         map.setView([lat, lng], 14);
                     }
+
+                    // ponytail: warn when the marker lands outside the selected administrasi polygon —
+                    // a concave polygon's stored centroid can sit outside its own boundary
+                    if (currentGeom && !isInsidePolygon(marker.getLatLng())) {
+                        // defer so Alpine has registered its window listener on init
+                        setTimeout(() => window.dispatchEvent(new Event('open-outside-polygon')), 100);
+                    }
                 }
 
                 // Klik pada map
@@ -383,6 +394,34 @@
                         console.warn('Klik di luar polygon');
                     }
                 });
+
+                // ponytail: expose helpers for the outside-polygon dialog (snap inside / manual entry / live status)
+                window.gkKonflikMap = {
+                    snapInside() {
+                        if (!currentGeom || !marker) return;
+                        var poly = typeof currentGeom === 'string' ? JSON.parse(currentGeom) : currentGeom;
+                        // turf.pointOnFeature always returns a point inside a Polygon/MultiPolygon —
+                        // guarantees a valid in-bounds snap even for concave shapes
+                        var inside = turf.pointOnFeature(poly);
+                        setMarker(inside.geometry.coordinates[1], inside.geometry.coordinates[0]);
+                    },
+                    setManual(lat, lng) {
+                        var nLat = parseFloat(lat);
+                        var nLng = parseFloat(lng);
+                        if (isNaN(nLat) || isNaN(nLng)) {
+                            return { ok: false, reason: 'invalid' };
+                        }
+                        if (!isInsidePolygon(L.latLng(nLat, nLng))) {
+                            return { ok: false, reason: 'outside' };
+                        }
+                        setMarker(nLat, nLng);
+                        return { ok: true };
+                    },
+                    isInside(lat, lng) {
+                        if (!currentGeom) return false;
+                        return isInsidePolygon(L.latLng(lat, lng));
+                    }
+                };
 
                 // Initial load
                 if (currentLat && currentLng) {

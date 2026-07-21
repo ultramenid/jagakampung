@@ -4,6 +4,8 @@
         @include('partials.deleterModal')
     </div>
 
+    @include('partials.outsidePolygonModal')
+
     <div class="max-w-4xl mx-auto">
 
         {{-- Header --}}
@@ -335,6 +337,15 @@
             return turf.booleanPointInPolygon(point, polygon);
         }
 
+        function setMarker(lat, lng) {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lng]).addTo(map);
+            currentLat = lat;
+            currentLng = lng;
+            @this.set('latitude', lat);
+            @this.set('longtitude', lng);
+        }
+
         function renderMap(lat, lng, geom) {
             if (marker) { map.removeLayer(marker); marker = null; }
             if (geojsonLayer) { map.removeLayer(geojsonLayer); geojsonLayer = null; }
@@ -350,6 +361,13 @@
             } else {
                 map.setView([lat, lng], 14);
             }
+
+            // ponytail: warn when the marker lands outside the selected administrasi polygon —
+            // happens when stored coordinates drift, or a concave polygon's centroid sits outside
+            if (currentGeom && !isInsidePolygon(marker.getLatLng())) {
+                // defer so Alpine has registered its window listener on init
+                setTimeout(() => window.dispatchEvent(new Event('open-outside-polygon')), 100);
+            }
         }
 
         // Klik map untuk pindah marker (hanya dalam polygon)
@@ -357,14 +375,37 @@
             if (!currentGeom) return;
 
             if (isInsidePolygon(e.latlng)) {
-                if (marker) map.removeLayer(marker);
-                marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-                currentLat = e.latlng.lat;
-                currentLng = e.latlng.lng;
-                @this.set('latitude', e.latlng.lat);
-                @this.set('longtitude', e.latlng.lng);
+                setMarker(e.latlng.lat, e.latlng.lng);
             }
         });
+
+        // ponytail: expose helpers for the outside-polygon dialog (snap inside / manual entry / live status)
+        window.gkKonflikMap = {
+            snapInside() {
+                if (!currentGeom || !marker) return;
+                var poly = typeof currentGeom === 'string' ? JSON.parse(currentGeom) : currentGeom;
+                // turf.pointOnFeature always returns a point inside a Polygon/MultiPolygon —
+                // guarantees a valid in-bounds snap even for concave shapes
+                var inside = turf.pointOnFeature(poly);
+                setMarker(inside.geometry.coordinates[1], inside.geometry.coordinates[0]);
+            },
+            setManual(lat, lng) {
+                var nLat = parseFloat(lat);
+                var nLng = parseFloat(lng);
+                if (isNaN(nLat) || isNaN(nLng)) {
+                    return { ok: false, reason: 'invalid' };
+                }
+                if (!isInsidePolygon(L.latLng(nLat, nLng))) {
+                    return { ok: false, reason: 'outside' };
+                }
+                setMarker(nLat, nLng);
+                return { ok: true };
+            },
+            isInside(lat, lng) {
+                if (!currentGeom) return false;
+                return isInsidePolygon(L.latLng(lat, lng));
+            }
+        };
 
         // Initial load
         if (currentLat && currentLng) {
