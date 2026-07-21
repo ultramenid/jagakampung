@@ -60,7 +60,6 @@
                         </div>
                         <div class="min-w-0">
                             <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ (int) $stats['jiwa'] }}</p>
-                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Jiwa terdampak</p>
                         </div>
                     </div>
                 </div>

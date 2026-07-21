@@ -542,14 +542,13 @@ function renderSidebar(data) {
                                 <span class="font-mono text-base font-semibold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.kk)}</span>
                                 <span class="font-mono text-[10px] font-medium text-gray-400">KK</span>
                             </div>
-                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Kepala keluarga terdampak</p>
+                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight"KK terdampak</p>
                         </div>
                         <div class="px-3.5 py-3 border-l border-gray-100">
                             <div class="flex items-baseline gap-1">
                                 <span class="font-mono text-base font-semibold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.jiwa)}</span>
                                 <span class="font-mono text-[10px] font-medium text-gray-400">jiwa</span>
                             </div>
-                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Jiwa terdampak</p>
                         </div>
                     </div>
                 </div>

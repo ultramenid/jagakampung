@@ -698,15 +698,15 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 gap-2 mt-2">
-                                <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                                <div class="bg-gray-50 rounded-xl px-2.5 py-3">
                                     <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Luas (Ha)</div>
                                     <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.luas)}</div>
                                 </div>
-                                <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                                <div class="bg-gray-50 rounded-xl px-2.5 py-3">
                                     <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">KK</div>
                                     <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.kk)}</div>
                                 </div>
-                                <div class="bg-gray-50 rounded-xl px-2.5 py-3 text-center">
+                                <div class="bg-gray-50 rounded-xl px-2.5 py-3">
                                     <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Jiwa</div>
                                     <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.jiwa)}</div>
                                 </div>
