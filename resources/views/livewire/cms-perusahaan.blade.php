@@ -50,4 +50,10 @@
             </tbody>
         </table>
     </div>
+
+    @if ($databases->hasPages())
+        <div class="mt-4">
+            {{ $databases->links() }}
+        </div>
+    @endif
 </div>

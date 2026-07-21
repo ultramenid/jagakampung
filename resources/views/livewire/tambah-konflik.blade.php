@@ -135,12 +135,27 @@
                         </div>
                         <div>
                             <label for="tk-perusahaan" class="gk-label">Perusahaan</label>
-                            <select id="tk-perusahaan" wire:model="selectedPerusahaan" class="gk-select {{ !$selectedGroup ? 'opacity-50' : '' }}">
-                                <option value="">{{ $selectedGroup ? 'Pilih perusahaan' : 'Pilih group dulu' }}</option>
-                                @foreach ($perusahaans as $perusahaan)
-                                    <option value="{{ $perusahaan->perusahaan }}">{{ $perusahaan->perusahaan }}</option>
-                                @endforeach
-                            </select>
+                            <div x-data="{ open: false, search: '', items: @js($perusahaans->pluck('perusahaan')->toArray()) }" wire:key="perusahaan-{{ $selectedGroup }}" @click.outside="open = false; search = ''" class="relative">
+                                <button type="button" @click="open = !open; search = '';"
+                                    class="flex items-center justify-between w-full bg-white border border-gray-200 rounded-md h-10 px-3 cursor-pointer hover:border-gray-300 transition-colors text-sm {{ !$selectedGroup ? 'opacity-50' : '' }}">
+                                    <span class="{{ $selectedPerusahaan ? 'text-gray-900' : 'text-gray-400' }} truncate">{{ $selectedPerusahaan ?: 'Cari perusahaan…' }}</span>
+                                    <svg class="h-4 w-4 text-gray-400 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                    class="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-geist overflow-hidden">
+                                    <div class="p-2 border-b border-gray-100">
+                                        <input x-model.debounce.200ms="search" type="text" class="gk-input h-9" placeholder="Cari perusahaan…" @keydown.escape="open = false; search = ''" />
+                                    </div>
+                                    <div class="max-h-52 overflow-y-auto">
+                                        <template x-for="item in items.filter(i => i.toLowerCase().includes(search.toLowerCase()))" :key="item">
+                                            <div @click="$wire.set('selectedPerusahaan', item); open = false; search = '';"
+                                                class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors" x-text="item">
+                                            </div>
+                                        </template>
+                                        <div x-show="items.length === 0" class="px-4 py-6 text-center text-sm text-gray-400">{{ $selectedGroup ? 'Tidak ada perusahaan' : 'Pilih group dulu' }}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

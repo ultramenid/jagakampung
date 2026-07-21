@@ -573,7 +573,8 @@ function renderSidebar(data) {
                 <div>
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Instansi</p>
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                        <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Lembaga Pendamping</div>
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">
+                            Pendamping / Sumber Informasi</div>
                         <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.lembaga ?? "—")}</div>
                     </div>
                 </div>
