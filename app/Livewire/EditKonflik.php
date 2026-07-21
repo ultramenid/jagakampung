@@ -78,10 +78,15 @@ class EditKonflik extends Component
 
         // ponytail: the `geom` column in mv_level_6_id is already GeoJSON text (not a PostGIS geometry),
         // so we select it raw — ST_AsGeoJSON() chokes on it with "parse error - invalid geometry".
+        // Match all four fields (not just desa) so we re-fetch the same admin row the user
+        // originally selected — desa names alone can collide across different kecamatan/kabkota/provinsi.
         $geom = DB::connection("pgsql_gis")
             ->table("proteus.mv_level_6_id")
             ->select("geom", "name", "latitude", "longtitude")
-            ->where("name", "ILIKE", "%" . $this->chooseRegion . "%")
+            ->where("name", "ILIKE", "%" . $this->desa . "%")
+            ->where("name", "ILIKE", "%" . $this->kecamatan . "%")
+            ->where("name", "ILIKE", "%" . $this->kabkota . "%")
+            ->where("name", "ILIKE", "%" . $this->provinsi . "%")
             ->first();
 
         $this->geom = $geom?->geom;
