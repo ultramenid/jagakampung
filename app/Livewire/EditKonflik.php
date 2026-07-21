@@ -76,14 +76,15 @@ class EditKonflik extends Component
 
         $this->region = "{$this->provinsi} | {$this->kabkota} | {$this->kecamatan} | {$this->desa} ";
 
+        // ponytail: the `geom` column in mv_level_6_id is already GeoJSON text (not a PostGIS geometry),
+        // so we select it raw — ST_AsGeoJSON() chokes on it with "parse error - invalid geometry".
         $geom = DB::connection("pgsql_gis")
             ->table("proteus.mv_level_6_id")
-            // ->selectRaw('ST_AsGeoJSON(geom÷) as geom')
             ->select("geom", "name", "latitude", "longtitude")
             ->where("name", "ILIKE", "%" . $this->chooseRegion . "%")
             ->first();
 
-        $this->geom = $geom->geom;
+        $this->geom = $geom?->geom;
         $this->dispatch("connected", [
             "latitude" => $this->latitude,
             "longitude" => $this->longtitude,
@@ -455,10 +456,8 @@ class EditKonflik extends Component
 
         $this->administrasi = DB::connection("pgsql_gis")
             ->table("proteus.mv_level_6_id")
-            ->selectRaw(
-                'ST_AsGeoJSON(geom) as geom, "NAME" as name, latitude, longtitude',
-            )
-            ->where("NAME", "ILIKE", "%" . $this->chooseRegion . "%")
+            ->select("geom", "name", "latitude", "longtitude")
+            ->where("name", "ILIKE", "%" . $this->chooseRegion . "%")
             ->get();
     }
 
