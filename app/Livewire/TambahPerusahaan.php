@@ -24,27 +24,22 @@ class TambahPerusahaan extends Component
         }
     }
     public function checkNamaExists(){
-        $check = DB::table('perusahaans')
-        ->where('group', $this->group)
-        ->where('perusahaan', $this->perusahaan)
-        ->first();
-        if($check){
-            return true;
-        }
-        return false;
+        return DB::table('perusahaans')
+            ->where('perusahaan', $this->perusahaan)
+            ->exists();
     }
     public function manualValidation(){
         if($this->group == ''){
             Toaster::error('Pilih salah satu group!');
             return;
+        }elseif($this->perusahaan == ''){
+            Toaster::error('Nama perusahaan harus diisi!');
+            return;
         }elseif($this->deskripsi == ''){
             Toaster::error('Deskripsi harus diisi!');
             return;
         }elseif($this->checkNamaExists()){
-            Toaster::error('Data sudah ada!');
-            return;
-        }elseif($this->perusahaan == ''){
-            Toaster::error('Nama perusahaan harus diisi!');
+            Toaster::error('Nama perusahaan sudah ada!');
             return;
         }
         return true;

@@ -41,8 +41,18 @@ class EditInstansi extends Component
         if($this->nama == ''){
             Toaster::error('Nama harus diisi!');
             return;
+        }elseif($this->checkNamaExists()){
+            Toaster::error('Nama lembaga sudah ada!');
+            return;
         }
         return true;
+    }
+
+    public function checkNamaExists(){
+        return DB::table('instansi')
+            ->where('nama', $this->nama)
+            ->where('id', '!=', $this->idInstansi)
+            ->exists();
     }
 
     public function render()

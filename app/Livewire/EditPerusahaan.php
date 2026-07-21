@@ -53,14 +53,24 @@ class EditPerusahaan extends Component
         if($this->group == ''){
             Toaster::error('Pilih salah satu group!');
             return;
-        }elseif($this->deskripsi == ''){
-            Toaster::error('Deskripsi harus diisi!');
-            return;
         }elseif($this->perusahaan == ''){
             Toaster::error('Nama perusahaan harus diisi!');
             return;
+        }elseif($this->deskripsi == ''){
+            Toaster::error('Deskripsi harus diisi!');
+            return;
+        }elseif($this->checkNamaExists()){
+            Toaster::error('Nama perusahaan sudah ada!');
+            return;
         }
         return true;
+    }
+
+    public function checkNamaExists(){
+        return DB::table('perusahaans')
+            ->where('perusahaan', $this->perusahaan)
+            ->where('id', '!=', $this->idPerusahaan)
+            ->exists();
     }
 
     public function getGroup(){
