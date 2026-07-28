@@ -279,7 +279,7 @@
                         // HTML-escape helper for DB-derived strings interpolated into innerHTML
                         const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
                         // Format integer with thousands separators (matches table view's number_format(_,0,'.',',')).
-                        const fmtNum = (n) => (n !== null && n !== undefined && n !== '' && !isNaN(Number(n))) ? Number(n).toLocaleString('en-US') : '—';
+                        const fmtNum = (n) => (n !== null && n !== undefined && n !== '' && !isNaN(Number(n))) ? Number(n).toLocaleString('id-ID') : '—';
 
                         window.openSidebar = function() {
                             sidebar.style.transform = 'translateX(0)';

@@ -50,16 +50,16 @@
                 {{-- scale: land + people --}}
                 <div class="mt-5 pt-4 border-t border-gray-100 space-y-4">
                     <div class="min-w-0">
-                        <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ number_format(round($stats['luas']), 0, '.', ',') }}</p>
+                        <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ number_format(round($stats['luas']), 0, ',', '.') }}</p>
                         <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Hektar terdampak</p>
                     </div>
                     <div class="flex items-end gap-6">
                         <div class="min-w-0">
-                            <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ (int) $stats['kk'] }}</p>
+                            <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ number_format($stats['kk'], 0, ',', '.') }}</p>
                             <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">KK terdampak</p>
                         </div>
                         <div class="min-w-0">
-                            <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ (int) $stats['jiwa'] }}</p>
+                            <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ number_format($stats['jiwa'], 0, ',', '.') }}</p>
                             <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Jiwa terdampak</p>
                         </div>
                     </div>
@@ -105,7 +105,7 @@
                                 </span>
                                 <span class="block text-[11px] text-gray-400 truncate">{{ $k->kabkota }}{{ $k->provinsi ? ', '.$k->provinsi : '' }}</span>
                                 <span class="block mt-1 font-mono text-[10px] text-gray-400 tabular-nums">
-                                    {{ number_format($k->luas, 0, '.', ',') }} ha · {{ number_format($k->kk ?? 0, 0, '.', ',') }} KK · {{ number_format($k->jiwa ?? 0, 0, '.', ',') }} jiwa
+                                    {{ number_format($k->luas, 0, ',', '.') }} ha · {{ number_format($k->kk ?? 0, 0, ',', '.') }} KK · {{ number_format($k->jiwa ?? 0, 0, ',', '.') }} jiwa
                                 </span>
                             </span>
                         </button>
