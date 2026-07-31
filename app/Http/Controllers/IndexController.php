@@ -70,16 +70,15 @@ class IndexController extends Controller
             ? DB::table('pbph_info')->whereIn('kode_pbph', $codes)->get()->keyBy('kode_pbph')
             : collect();
 
-        $names = collect($features)->pluck('properties.namobj')->filter()->unique()->all();
-        $konfliks = $names
-            ? DB::table('konflik')
-                ->whereIn('status', ['aktif', 'potensi'])
-                ->whereIn('perusahaan', $names)
-                ->orderByRaw("CASE status WHEN 'aktif' THEN 0 WHEN 'potensi' THEN 1 ELSE 2 END")
-                ->orderByDesc('luas')
-                ->get(['id', 'perusahaan', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'status', 'lat', 'long'])
-                ->groupBy('perusahaan')
-            : collect();
+        // ponytail: konflik diambil semua (jumlahnya kecil) lalu dicocokkan di PHP
+        // dengan contains case-insensitive dua arah — portabel lintas DB (ILIKE cuma
+        // Postgres) dan menampung beda kapital/spasi/ bentuk pendek. Kalau tabel
+        // konflik membesar, pindahkan ke WHERE ... ILIKE per namobj.
+        $konfliks = DB::table('konflik')
+            ->whereIn('status', ['aktif', 'potensi'])
+            ->orderByRaw("CASE status WHEN 'aktif' THEN 0 WHEN 'potensi' THEN 1 ELSE 2 END")
+            ->orderByDesc('luas')
+            ->get(['id', 'perusahaan', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'status', 'lat', 'long']);
 
         $lampirans = $infos->isNotEmpty()
             ? DB::table('pbph_lampiran')
@@ -112,9 +111,10 @@ class IndexController extends Controller
                 ];
             }
 
-            $k = $konfliks->get($props['namobj'] ?? null);
-            if ($k && $k->isNotEmpty()) {
-                $features[$i]['properties']['konflik'] = $k->map(fn ($r) => [
+            $nama = $props['namobj'] ?? null;
+            $matched = $konfliks->filter(fn ($r) => self::namaMirip($nama, $r->perusahaan))->values();
+            if ($matched->isNotEmpty()) {
+                $features[$i]['properties']['konflik'] = $matched->map(fn ($r) => [
                     'id' => $r->id,
                     'desa' => $r->desa,
                     'kecamatan' => $r->kecamatan,
@@ -128,6 +128,18 @@ class IndexController extends Controller
         }
 
         return $features;
+    }
+
+    /** Cocokkan nama perusahaan secara contains case-insensitive dua arah. */
+    private static function namaMirip(string|null $a, string|null $b): bool
+    {
+        $a = preg_replace('/\s+/', ' ', trim(mb_strtolower((string) $a)));
+        $b = preg_replace('/\s+/', ' ', trim(mb_strtolower((string) $b)));
+        if ($a === '' || $b === '') {
+            return false;
+        }
+
+        return $a === $b || str_contains($a, $b) || str_contains($b, $a);
     }
 
     public function index(){
