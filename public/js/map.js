@@ -167,7 +167,7 @@ if (typeof L.bmSwitcher !== "undefined") {
 const wmsLayers = {
 
     kawasanhutan: "jagamkampung:KH2025",
-    pbph: "jagamkampung:PBPH_2025",
+    pbph: "jagamkampung:PBPH_JULI2026",
 };
 
 const layers = {};
