@@ -16,8 +16,6 @@ class TambahPbph extends Component
     use WithFileUploads, HandlesPbphLampiran;
 
     public $kode_pbph, $izin_pertama, $izin_saat_ini, $luas, $komisaris, $direktur_utama, $direktur;
-    public $konflikIds = [];
-    public $filterPerusahaan = '';
     // pencarian konsesi: $cariKonsesi = kata kunci, $namaKonsesi = label yang tampil di tombol
     public $cariKonsesi = '', $namaKonsesi = 'Pilih konsesi';
 
@@ -59,7 +57,6 @@ class TambahPbph extends Component
                 'updated_at' => Carbon::now('Asia/Jakarta'),
             ]);
 
-            $this->syncKonflik($id);
             $this->simpanLampiran($id);
         });
 
@@ -99,28 +96,7 @@ class TambahPbph extends Component
             Toaster::error('Direktur harus diisi!');
             return;
         }
-        // Konflik terkait tetap opsional — sebagian besar konsesi memang tidak
-        // punya konflik tercatat, jadi mewajibkannya akan mengunci form.
         return true;
-    }
-
-    protected function syncKonflik($pbphInfoId){
-        DB::table('konflik_pbph')->where('pbph_info_id', $pbphInfoId)->delete();
-
-        $rows = DB::table('konflik')
-            ->whereIn('id', array_filter((array) $this->konflikIds))
-            ->pluck('id')
-            ->map(fn ($konflikId) => [
-                'pbph_info_id' => $pbphInfoId,
-                'konflik_id' => $konflikId,
-                'created_at' => Carbon::now('Asia/Jakarta'),
-                'updated_at' => Carbon::now('Asia/Jakarta'),
-            ])
-            ->all();
-
-        if ($rows) {
-            DB::table('konflik_pbph')->insert($rows);
-        }
     }
 
     /**
@@ -183,37 +159,6 @@ class TambahPbph extends Component
 
         return view('livewire.tambah-pbph', [
             'konsesis' => $konsesis,
-            'konfliks' => $this->getKonflik(),
-            'perusahaans' => $this->getPerusahaanKonflik(),
         ]);
-    }
-
-    /**
-     * Kandidat konflik: disaring per perusahaan, tapi yang sudah dicentang selalu
-     * ikut tampil — kalau tidak, ganti filter akan menyembunyikan pilihan sendiri.
-     */
-    protected function getKonflik(){
-        $terpilih = array_filter((array) $this->konflikIds);
-
-        return DB::table('konflik')
-            ->select('id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'status', 'perusahaan')
-            ->when($this->filterPerusahaan !== '', fn ($q) => $q->where(function ($q) use ($terpilih) {
-                $q->where('perusahaan', $this->filterPerusahaan);
-                if ($terpilih) {
-                    $q->orWhereIn('id', $terpilih);
-                }
-            }))
-            ->orderBy('perusahaan')
-            ->orderBy('provinsi')
-            ->get();
-    }
-
-    protected function getPerusahaanKonflik(){
-        return DB::table('konflik')
-            ->whereNotNull('perusahaan')
-            ->where('perusahaan', '!=', '')
-            ->distinct()
-            ->orderBy('perusahaan')
-            ->pluck('perusahaan');
     }
 }

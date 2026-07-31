@@ -60,7 +60,6 @@ class CmsPbph extends Component
 
         DB::transaction(function () use ($id) {
             DB::table('pbph_lampiran')->where('pbph_info_id', $id)->delete();
-            DB::table('konflik_pbph')->where('pbph_info_id', $id)->delete();
             DB::table('pbph_info')->where('id', $id)->delete();
         });
 

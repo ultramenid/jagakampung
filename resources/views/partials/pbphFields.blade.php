@@ -68,33 +68,3 @@
     <div wire:loading wire:target="uploads" class="text-[11px] text-gray-400 mt-1">Mengunggah…</div>
     @error('uploads.*') <p class="gk-error">{{ $message }}</p> @enderror
 </div>
-
-<div class="pt-2 border-t border-gray-100">
-    <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mt-4 mb-1">Konflik Terkait</p>
-    <p class="text-xs text-gray-500 mb-3">Opsional. Saring per perusahaan, lalu centang konflik yang terkait.</p>
-
-    <select wire:model.live="filterPerusahaan" class="gk-select mb-2">
-        <option value="">Semua perusahaan</option>
-        @foreach ($perusahaans as $namaPerusahaan)
-            <option value="{{ $namaPerusahaan }}">{{ $namaPerusahaan }}</option>
-        @endforeach
-    </select>
-
-    {{-- checkbox, bukan <select multiple>: mengganti filter tidak boleh diam-diam
-         membuang pilihan yang sudah dicentang tapi tersaring keluar --}}
-    <div class="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-52 overflow-y-auto">
-        @forelse ($konfliks as $konflik)
-            <label class="flex items-start gap-3 px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors">
-                <input type="checkbox" wire:model="konflikIds" value="{{ $konflik->id }}" class="mt-0.5 shrink-0">
-                <span class="text-xs text-gray-700 leading-relaxed">
-                    {{ $konflik->desa }}, {{ $konflik->kecamatan }} — {{ $konflik->kabkota }}, {{ $konflik->provinsi }}
-                    <span class="block text-gray-500 mt-0.5">{{ $konflik->perusahaan ?: '—' }} · {{ $konflik->status }}</span>
-                </span>
-            </label>
-        @empty
-            <p class="px-3 py-6 text-center text-xs text-gray-400">
-                {{ $filterPerusahaan !== '' ? 'Tidak ada konflik untuk perusahaan ini.' : 'Belum ada data konflik.' }}
-            </p>
-        @endforelse
-    </div>
-</div>

@@ -139,29 +139,10 @@ class PbphTest extends TestCase
         $this->assertDatabaseCount('pbph_info', 0);
     }
 
-    public function test_konflik_filter_by_perusahaan_keeps_checked_items_visible(): void
+    public function test_can_create_pbph_info(): void
     {
         $this->loginAsAdmin();
         $this->fakeGeoserver();
-        $sawit = $this->seedKonflik(['desa' => 'Desa Sawit', 'perusahaan' => 'PT Sawit']);
-        $kayu = $this->seedKonflik(['desa' => 'Desa Kayu', 'perusahaan' => 'PT Kayu']);
-
-        Livewire::test(\App\Livewire\TambahPbph::class)
-            ->assertViewHas('perusahaans', fn ($p) => $p->contains('PT Sawit') && $p->contains('PT Kayu'))
-            // saring: hanya konflik PT Sawit
-            ->set('filterPerusahaan', 'PT Sawit')
-            ->assertViewHas('konfliks', fn ($k) => $k->pluck('id')->all() === [$sawit])
-            // sudah dicentang lalu filter berganti — pilihan itu harus tetap terlihat
-            ->set('konflikIds', [$kayu])
-            ->assertViewHas('konfliks', fn ($k) => $k->pluck('id')->sort()->values()->all() === collect([$sawit, $kayu])->sort()->values()->all());
-    }
-
-    public function test_can_create_pbph_info_with_konflik_relation(): void
-    {
-        $this->loginAsAdmin();
-        $this->fakeGeoserver();
-        $konflikA = $this->seedKonflik(['desa' => 'Desa A']);
-        $konflikB = $this->seedKonflik(['desa' => 'Desa B']);
 
         Livewire::test(\App\Livewire\TambahPbph::class)
             ->set('kode_pbph', '150002A201084')
@@ -171,7 +152,6 @@ class PbphTest extends TestCase
             ->set('komisaris', 'Budi')
             ->set('direktur_utama', 'Siti')
             ->set('direktur', 'Andi')
-            ->set('konflikIds', [$konflikA, $konflikB])
             ->call('storeDatabase')
             ->assertRedirect('/cms/pbph');
 
@@ -183,10 +163,6 @@ class PbphTest extends TestCase
             'luas' => '21315.50',
             'direktur_utama' => 'Siti',
         ]);
-
-        $id = DB::table('pbph_info')->where('kode_pbph', '150002A201084')->value('id');
-        $this->assertDatabaseHas('konflik_pbph', ['pbph_info_id' => $id, 'konflik_id' => $konflikA]);
-        $this->assertDatabaseHas('konflik_pbph', ['pbph_info_id' => $id, 'konflik_id' => $konflikB]);
     }
 
     /** Setiap field wajib diisi — dites satu per satu dengan dikosongkan bergantian. */
@@ -262,25 +238,18 @@ class PbphTest extends TestCase
         $this->assertDatabaseCount('pbph_info', 0);
     }
 
-    public function test_edit_updates_fields_and_replaces_konflik_links(): void
+    public function test_edit_updates_fields(): void
     {
         $this->loginAsAdmin();
         $id = $this->seedPbphInfo();
-        $lama = $this->seedKonflik(['desa' => 'Desa Lama']);
-        $baru = $this->seedKonflik(['desa' => 'Desa Baru']);
-        DB::table('konflik_pbph')->insert(['pbph_info_id' => $id, 'konflik_id' => $lama]);
 
         Livewire::test(\App\Livewire\EditPbph::class, ['idDB' => $id])
-            ->assertSet('konflikIds', [(string) $lama])
             ->set('izin_saat_ini', 'SK.90/2022')
             ->set('luas', '34730')
-            ->set('konflikIds', [$baru])
             ->call('storeDatabase')
             ->assertRedirect('/cms/pbph');
 
         $this->assertDatabaseHas('pbph_info', ['id' => $id, 'izin_saat_ini' => 'SK.90/2022', 'luas' => '34730.00']);
-        $this->assertDatabaseHas('konflik_pbph', ['pbph_info_id' => $id, 'konflik_id' => $baru]);
-        $this->assertDatabaseMissing('konflik_pbph', ['pbph_info_id' => $id, 'konflik_id' => $lama]);
     }
 
     public function test_edit_cannot_change_kode_pbph(): void
@@ -295,12 +264,10 @@ class PbphTest extends TestCase
         $this->assertDatabaseHas('pbph_info', ['id' => $id, 'kode_pbph' => '150006A200740']);
     }
 
-    public function test_delete_removes_row_and_its_konflik_links(): void
+    public function test_delete_removes_row(): void
     {
         $this->loginAsAdmin();
         $id = $this->seedPbphInfo();
-        $konflik = $this->seedKonflik();
-        DB::table('konflik_pbph')->insert(['pbph_info_id' => $id, 'konflik_id' => $konflik]);
 
         Livewire::test(\App\Livewire\CmsPbph::class)
             ->call('delete', $id)
@@ -310,7 +277,6 @@ class PbphTest extends TestCase
             ->call('deleting', $id);
 
         $this->assertDatabaseMissing('pbph_info', ['id' => $id]);
-        $this->assertDatabaseMissing('konflik_pbph', ['pbph_info_id' => $id]);
     }
 
     /** Livewire tidak lewat middleware route — komponen harus menjaga dirinya sendiri. */
@@ -485,9 +451,7 @@ class PbphTest extends TestCase
     public function test_map_popup_is_enriched_with_pbph_info(): void
     {
         $this->fakeFeatureInfo();
-        $id = $this->seedPbphInfo();
-        $konflik = $this->seedKonflik(['desa' => 'Desa Tampil', 'status' => 'aktif', 'user_id' => null]);
-        DB::table('konflik_pbph')->insert(['pbph_info_id' => $id, 'konflik_id' => $konflik]);
+        $this->seedPbphInfo();
 
         $props = $this->get($this->featureInfoUrl())
             ->assertStatus(200)
@@ -499,8 +463,27 @@ class PbphTest extends TestCase
         // atribut asli dari layer tetap utuh
         $this->assertSame('PBPH HP', $props['jenis']);
         $this->assertSame([], $props['info']['lampiran']);
-        // relasi konflik sengaja tidak ikut ke popup peta
+        // tidak ada konflik berisi perusahaan ini → key konflik tidak ikut
         $this->assertArrayNotHasKey('konflik', $props);
+    }
+
+    public function test_map_popup_lists_konflik_matched_by_perusahaan(): void
+    {
+        $this->fakeFeatureInfo();
+        $this->seedPbphInfo();
+        $aktif = $this->seedKonflik(['desa' => 'Desa Aktif', 'perusahaan' => 'PT PUTRADUTA INDAH WOOD', 'status' => 'aktif']);
+        $potensi = $this->seedKonflik(['desa' => 'Desa Potensi', 'perusahaan' => 'PT PUTRADUTA INDAH WOOD', 'status' => 'potensi']);
+        // perusahaan lain tidak ikut, draft tetap privat
+        $this->seedKonflik(['desa' => 'Desa Lain', 'perusahaan' => 'PT LAIN', 'status' => 'aktif']);
+        $this->seedKonflik(['desa' => 'Desa Rahasia', 'perusahaan' => 'PT PUTRADUTA INDAH WOOD', 'status' => 'draft']);
+
+        $konflik = $this->get($this->featureInfoUrl())
+            ->assertStatus(200)
+            ->json('features.0.properties.konflik');
+
+        $this->assertSame([$aktif, $potensi], array_column($konflik, 'id'));
+        $this->assertContains('Desa Aktif', array_column($konflik, 'desa'));
+        $this->assertNotContains('Desa Rahasia', array_column($konflik, 'desa'));
     }
 
     public function test_map_popup_includes_attachments(): void
@@ -518,18 +501,6 @@ class PbphTest extends TestCase
 
         $this->assertSame(['SK Izin Pertama', 'Peta Konsesi'], array_column($lampiran, 'nama'));
         $this->assertSame('/storage/pbph-lampiran/abc123.pdf', $lampiran[0]['url']);
-    }
-
-    public function test_map_popup_never_exposes_konflik(): void
-    {
-        $this->fakeFeatureInfo();
-        $id = $this->seedPbphInfo();
-        $draft = $this->seedKonflik(['desa' => 'Desa Rahasia', 'status' => 'draft', 'user_id' => null]);
-        DB::table('konflik_pbph')->insert(['pbph_info_id' => $id, 'konflik_id' => $draft]);
-
-        $this->get($this->featureInfoUrl())
-            ->assertStatus(200)
-            ->assertDontSee('Desa Rahasia');
     }
 
     public function test_map_popup_unchanged_for_concession_without_info(): void

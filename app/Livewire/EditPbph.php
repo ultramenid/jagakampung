@@ -15,8 +15,6 @@ class EditPbph extends Component
 
     public $idPbph, $kode_pbph, $nama_perusahaan;
     public $izin_pertama, $izin_saat_ini, $luas, $komisaris, $direktur_utama, $direktur;
-    public $konflikIds = [];
-    public $filterPerusahaan = '';
 
     public function mount($idDB){
         $this->idPbph = $idDB;
@@ -33,12 +31,6 @@ class EditPbph extends Component
         $this->komisaris = $data->komisaris;
         $this->direktur_utama = $data->direktur_utama;
         $this->direktur = $data->direktur;
-
-        $this->konflikIds = DB::table('konflik_pbph')
-            ->where('pbph_info_id', $this->idPbph)
-            ->pluck('konflik_id')
-            ->map(fn ($id) => (string) $id)
-            ->all();
 
         $this->muatLampiran($this->idPbph);
     }
@@ -61,7 +53,6 @@ class EditPbph extends Component
                 'updated_at' => Carbon::now('Asia/Jakarta'),
             ]);
 
-            $this->syncKonflik();
             $this->simpanLampiran($this->idPbph);
         });
 
@@ -91,27 +82,7 @@ class EditPbph extends Component
             Toaster::error('Direktur harus diisi!');
             return;
         }
-        // Konflik terkait tetap opsional — lihat catatan di TambahPbph.
         return true;
-    }
-
-    protected function syncKonflik(){
-        DB::table('konflik_pbph')->where('pbph_info_id', $this->idPbph)->delete();
-
-        $rows = DB::table('konflik')
-            ->whereIn('id', array_filter((array) $this->konflikIds))
-            ->pluck('id')
-            ->map(fn ($konflikId) => [
-                'pbph_info_id' => $this->idPbph,
-                'konflik_id' => $konflikId,
-                'created_at' => Carbon::now('Asia/Jakarta'),
-                'updated_at' => Carbon::now('Asia/Jakarta'),
-            ])
-            ->all();
-
-        if ($rows) {
-            DB::table('konflik_pbph')->insert($rows);
-        }
     }
 
     private function authorizeAdmin(){
@@ -122,38 +93,6 @@ class EditPbph extends Component
 
     public function render()
     {
-        return view('livewire.edit-pbph', [
-            'konfliks' => $this->getKonflik(),
-            'perusahaans' => $this->getPerusahaanKonflik(),
-        ]);
-    }
-
-    /**
-     * Kandidat konflik: disaring per perusahaan, tapi yang sudah dicentang selalu
-     * ikut tampil — kalau tidak, ganti filter akan menyembunyikan pilihan sendiri.
-     */
-    protected function getKonflik(){
-        $terpilih = array_filter((array) $this->konflikIds);
-
-        return DB::table('konflik')
-            ->select('id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'status', 'perusahaan')
-            ->when($this->filterPerusahaan !== '', fn ($q) => $q->where(function ($q) use ($terpilih) {
-                $q->where('perusahaan', $this->filterPerusahaan);
-                if ($terpilih) {
-                    $q->orWhereIn('id', $terpilih);
-                }
-            }))
-            ->orderBy('perusahaan')
-            ->orderBy('provinsi')
-            ->get();
-    }
-
-    protected function getPerusahaanKonflik(){
-        return DB::table('konflik')
-            ->whereNotNull('perusahaan')
-            ->where('perusahaan', '!=', '')
-            ->distinct()
-            ->orderBy('perusahaan')
-            ->pluck('perusahaan');
+        return view('livewire.edit-pbph');
     }
 }

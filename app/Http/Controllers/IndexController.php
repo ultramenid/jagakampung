@@ -58,52 +58,73 @@ class IndexController extends Controller
     }
 
     /**
-     * Sisipkan info kurasi PBPH (dari CMS) ke properti tiap feature, supaya popup
-     * peta tidak perlu request kedua. Konsesi tanpa data info dibiarkan apa adanya.
+     * Sisipkan info kurasi PBPH (dari CMS) + daftar konflik terkait ke properti tiap
+     * feature, supaya popup peta tidak perlu request kedua. Konsesi tanpa data info
+     * dibiarkan apa adanya. Konflik dikaitkan lewat nama perusahaan dan hanya yang
+     * tampil di peta (aktif/potensi) — draft tetap privat pemiliknya.
      */
     private function enrichPbph(array $features): array
     {
         $codes = collect($features)->pluck('properties.kode_pbph')->filter()->unique();
-        if ($codes->isEmpty()) {
-            return $features;
-        }
+        $infos = $codes->isNotEmpty()
+            ? DB::table('pbph_info')->whereIn('kode_pbph', $codes)->get()->keyBy('kode_pbph')
+            : collect();
 
-        $infos = DB::table('pbph_info')->whereIn('kode_pbph', $codes)->get()->keyBy('kode_pbph');
-        if ($infos->isEmpty()) {
-            return $features;
-        }
+        $names = collect($features)->pluck('properties.namobj')->filter()->unique()->all();
+        $konfliks = $names
+            ? DB::table('konflik')
+                ->whereIn('status', ['aktif', 'potensi'])
+                ->whereIn('perusahaan', $names)
+                ->orderByRaw("CASE status WHEN 'aktif' THEN 0 WHEN 'potensi' THEN 1 ELSE 2 END")
+                ->orderByDesc('luas')
+                ->get(['id', 'perusahaan', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'status', 'lat', 'long'])
+                ->groupBy('perusahaan')
+            : collect();
 
-        // Konflik terkait sengaja TIDAK ikut dikirim — relasinya hanya dipakai di CMS,
-        // bukan di popup peta. Menambahkannya di sini berarti ikut menanggung aturan
-        // "draft cuma untuk pemiliknya" di endpoint publik; tidak perlu.
-        $lampirans = DB::table('pbph_lampiran')
-            ->whereIn('pbph_info_id', $infos->pluck('id'))
-            ->orderBy('id')
-            ->get(['pbph_info_id', 'nama', 'file'])
-            ->groupBy('pbph_info_id');
+        $lampirans = $infos->isNotEmpty()
+            ? DB::table('pbph_lampiran')
+                ->whereIn('pbph_info_id', $infos->pluck('id'))
+                ->orderBy('id')
+                ->get(['pbph_info_id', 'nama', 'file'])
+                ->groupBy('pbph_info_id')
+            : collect();
 
         foreach ($features as $i => $feature) {
-            $info = $infos->get($feature['properties']['kode_pbph'] ?? null);
-            if (! $info) {
-                continue;
+            $props = $feature['properties'] ?? [];
+
+            $info = $infos->get($props['kode_pbph'] ?? null);
+            if ($info) {
+                $features[$i]['properties']['info'] = [
+                    'nama_perusahaan' => $info->nama_perusahaan,
+                    'izin_pertama' => $info->izin_pertama,
+                    'izin_saat_ini' => $info->izin_saat_ini,
+                    'luas' => $info->luas === null ? null : (float) $info->luas,
+                    'komisaris' => $info->komisaris,
+                    'direktur_utama' => $info->direktur_utama,
+                    'direktur' => $info->direktur,
+                    'lampiran' => $lampirans->get($info->id, collect())
+                        ->map(fn ($l) => [
+                            'nama' => $l->nama,
+                            'berkas' => $l->file,
+                            'url' => Storage::url('pbph-lampiran/'.$l->file),
+                        ])
+                        ->values(),
+                ];
             }
 
-            $features[$i]['properties']['info'] = [
-                'nama_perusahaan' => $info->nama_perusahaan,
-                'izin_pertama' => $info->izin_pertama,
-                'izin_saat_ini' => $info->izin_saat_ini,
-                'luas' => $info->luas === null ? null : (float) $info->luas,
-                'komisaris' => $info->komisaris,
-                'direktur_utama' => $info->direktur_utama,
-                'direktur' => $info->direktur,
-                'lampiran' => $lampirans->get($info->id, collect())
-                    ->map(fn ($l) => [
-                        'nama' => $l->nama,
-                        'berkas' => $l->file,
-                        'url' => Storage::url('pbph-lampiran/'.$l->file),
-                    ])
-                    ->values(),
-            ];
+            $k = $konfliks->get($props['namobj'] ?? null);
+            if ($k && $k->isNotEmpty()) {
+                $features[$i]['properties']['konflik'] = $k->map(fn ($r) => [
+                    'id' => $r->id,
+                    'desa' => $r->desa,
+                    'kecamatan' => $r->kecamatan,
+                    'kabkota' => $r->kabkota,
+                    'provinsi' => $r->provinsi,
+                    'status' => $r->status,
+                    'lat' => $r->lat,
+                    'long' => $r->long,
+                ])->values()->all();
+            }
         }
 
         return $features;

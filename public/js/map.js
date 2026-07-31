@@ -348,6 +348,12 @@ map.on("click", async function (e) {
         .openOn(map);
 });
 
+// Dari popup PBPH → tutup popup, terbang ke marker konflik, buka detailnya.
+window.popupToKonflik = function (id, lat, lng) {
+    map.closePopup();
+    focusKonflik(id, lat, lng);
+};
+
 /* ── ISI POPUP ────────────────────────────────────────────────────────────
    Pola visualnya mengikuti panel kiri: label bagian mono huruf besar, angka
    besar tabular dengan keterangan kecil di bawahnya, dan garis rambut sebagai
@@ -393,6 +399,24 @@ function tautanLampiran(l) {
         <span class="font-mono text-[9px] uppercase text-gray-400 w-8 flex-shrink-0">${esc(ext || "file")}</span>
         <span class="text-[13px] text-gray-700 group-hover:text-gray-900 group-hover:underline break-words">${esc(l.nama)}</span>
     </a>`;
+}
+
+// Satu baris daftar konflik di popup PBPH — klik terbang ke marker + buka detail.
+function barisKonflik(k) {
+    const isAktif = k.status === "aktif";
+    const nama = k.desa || k.kecamatan || k.kabkota || "Tanpa nama";
+    const lokasi = [k.kabkota, k.provinsi].filter(Boolean).map(esc).join(", ");
+    return `<button type="button" onclick="popupToKonflik(${k.id}, ${k.lat}, ${k.long})"
+        class="w-full text-left flex items-center gap-2 py-1 group">
+        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 ${isAktif ? "bg-status-aktif" : "bg-status-potensi"}"></span>
+        <span class="min-w-0 flex-1">
+            <span class="flex items-baseline justify-between gap-2">
+                <span class="text-[12px] font-medium text-gray-900 group-hover:text-gray-950 truncate">${esc(nama)}</span>
+                <span class="font-mono text-[9px] uppercase tracking-wider flex-shrink-0 ${isAktif ? "text-status-aktif" : "text-status-potensi"}">${esc(k.status)}</span>
+            </span>
+            <span class="block text-[10px] text-gray-400 truncate">${lokasi}</span>
+        </span>
+    </button>`;
 }
 
 function kawasanCard(key, features) {
@@ -450,6 +474,22 @@ function pbphCard(features) {
             blok.push(
                 bagian(`${labelBagian("Lampiran", String(lampiran.length))}
                     <div class="mt-1.5">${lampiran.map(tautanLampiran).join("")}</div>`)
+            );
+        }
+
+        const konflik = p.konflik ?? [];
+        if (konflik.length) {
+            blok.push(
+                bagian(`${labelBagian("Konflik", String(konflik.length))}
+                    <details class="mt-1.5 group">
+                        <summary class="cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center gap-1 text-[11px] text-accent-600 hover:text-accent-700">
+                            <svg class="w-2.5 h-2.5 transition-transform group-open:rotate-90" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Lihat daftar konflik
+                        </summary>
+                        <div class="mt-1.5">${konflik.map(barisKonflik).join("")}</div>
+                    </details>`)
             );
         }
 
