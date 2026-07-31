@@ -53,8 +53,12 @@
             {{-- blocking: no backdrop click handler, no ESC handler --}}
             <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true"></div>
 
+            {{-- max-h + overflow-y-auto, bukan overflow-hidden: dialog ini memblokir
+                 (tidak bisa ditutup lewat backdrop maupun ESC), jadi kalau isinya lebih
+                 tinggi dari viewport — cabang input manual pada viewport pendek / browser
+                 zoom — tombol Simpan terpotong dan pengguna benar-benar terkunci. --}}
             <div role="dialog" aria-modal="true" aria-labelledby="outsidePolygonTitle"
-                 class="relative bg-white rounded-xl shadow-geist w-full max-w-md z-10 overflow-hidden"
+                 class="relative bg-white rounded-xl shadow-geist w-full max-w-md z-10 max-h-[90dvh] overflow-y-auto"
                  x-init="$nextTick(() => { $refs.outsideFirst && $refs.outsideFirst.focus() })">
 
                 {{-- Amber hairline warning strip --}}

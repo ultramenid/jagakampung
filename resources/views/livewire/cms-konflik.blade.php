@@ -1,4 +1,4 @@
-<div x-data="{ view: @entangle('viewMode') }">
+<div x-data="{ view: @entangle('viewMode') }" class="flex-1 min-h-0 flex flex-col">
 
     {{-- Floating Add Button --}}
     <a href="{{ url('/cms/tambah-konflik') }}"
@@ -12,10 +12,14 @@
     </a>
 
     {{-- MAP VIEW — always mounted; table opens as a popup over it --}}
-    <div>
+    {{-- relative: toggle + legenda di bawah ini di-anchor ke KOTAK PETA, bukan ke
+         viewport. Sebelumnya `fixed top-30` (120px) cuma menirukan tinggi
+         header+nav dari hasil ukur manual — begitu nav wrap atau viewport berubah,
+         angkanya meleset. --}}
+    <div class="relative flex-1 min-h-0 flex flex-col">
 
     {{-- View Toggle (floating top-right on map) --}}
-    <div class="fixed z-20 top-30 right-8 flex items-center bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-geist select-none">
+    <div class="absolute z-20 top-4 right-8 flex items-center bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-geist select-none">
         <button wire:click="$set('viewMode', 'map')" @click="view = 'map'"
             :class="view === 'map' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer">
@@ -35,7 +39,7 @@
     </div>
 
     <div role="group" aria-label="Legenda status konflik"
-        class="fixed z-20 bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2.5 shadow-geist font-mono text-[11px] uppercase tracking-wider text-gray-600 select-none">
+        class="absolute z-20 bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-5 py-2.5 shadow-geist font-mono text-[11px] uppercase tracking-wider text-gray-600 select-none">
 
         <button id="toggleAktif" aria-pressed="true" aria-label="Tampilkan titik Aktif" class="legend-btn flex items-center gap-1.5 cursor-pointer">
             <span aria-hidden="true" class="w-3 h-3 rounded-full bg-status-aktif border-2 border-white shadow-sm inline-block"></span>
@@ -59,7 +63,7 @@
     </div>
 
     {{-- Map --}}
-    <div role="application" aria-label="Peta konflik " class="w-full h-[89vh] z-10 rounded-md" id="map" wire:ignore></div>
+    <div role="application" aria-label="Peta konflik " class="w-full flex-1 min-h-0 z-10 rounded-md" id="map" wire:ignore></div>
 
     {{-- Mobile backdrop --}}
     <div id="sidebarOverlay"
@@ -357,15 +361,21 @@
                         };
 
                         // ── Map ───────────────────────────────────────────────────────────────
+                        // minZoom 4, bukan 5: setView di bawah minta zoom 4 tapi
+                        // minZoom 5 diam-diam meng-clamp-nya jadi 5 — jadi tampilan
+                        // awal tidak pernah sesuai maksud, dan di viewport yang
+                        // menyempit (jendela kecil / browser zoom 125%) titik-titik
+                        // di tepi Indonesia terpotong tanpa cara mengecilkan lagi.
+                        // Samakan dengan peta form konflik yang sudah pakai 4.
                         var map = L.map('map', {
                             gestureHandling: false,
-                            minZoom: 5,
+                            minZoom: 4,
                             fadeAnimation: true,
                         }).setView([-1.0893, 120.9213], 4);
 
                         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                             attribution: 'Auriga | Jagakampung',
-                            minZoom: 5,
+                            minZoom: 4,
                         }).addTo(map);
 
                         window.__map = map;
@@ -671,7 +681,7 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                                     ['Desa',         data.data.lokasi.desa],
                                 ].map(([label, val]) => `
                                             <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                                                <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">${label}</div>
+                                                <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">${label}</div>
                                                 <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(val ?? '—')}</div>
                                             </div>`).join('')}
                             </div>
@@ -689,25 +699,25 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                             <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Atribut</p>
                             <div class="grid grid-cols-2 gap-2">
                                 <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Group</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Group</div>
                                     <div class="text-xs font-semibold text-gray-800">${esc(data.data.atribut.group ?? '—')}</div>
                                 </div>
                                 <div class="bg-gray-50 rounded-xl px-3 py-2.5">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Perusahaan</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Perusahaan</div>
                                     <div class="text-xs font-semibold text-gray-800 leading-snug">${esc(data.data.atribut.perusahaan ?? '—')}</div>
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 gap-2 mt-2">
                                 <div class="bg-gray-50 rounded-xl px-2.5 py-3">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Luas (Ha)</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Luas (Ha)</div>
                                     <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.luas)}</div>
                                 </div>
                                 <div class="bg-gray-50 rounded-xl px-2.5 py-3">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">KK</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">KK</div>
                                     <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.kk)}</div>
                                 </div>
                                 <div class="bg-gray-50 rounded-xl px-2.5 py-3">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Jiwa</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Jiwa</div>
                                     <div class="text-base font-bold text-gray-900 tabular-nums leading-none">${fmtNum(data.data.atribut.jiwa)}</div>
                                 </div>
                             </div>

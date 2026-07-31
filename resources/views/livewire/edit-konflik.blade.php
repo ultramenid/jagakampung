@@ -28,7 +28,7 @@
             </div>
             <div class="p-6 space-y-5">
 
-            <div class="w-full h-80 rounded-md overflow-hidden border border-gray-200 z-10" id="map" wire:ignore></div>
+            <div class="w-full h-[clamp(14rem,38vh,20rem)] rounded-md overflow-hidden border border-gray-200 z-10" id="map" wire:ignore></div>
 
             {{-- Region Dropdown --}}
             <div x-data="{ open: false }" @click.outside="open = false" @close-region.window="open = false" class="relative">

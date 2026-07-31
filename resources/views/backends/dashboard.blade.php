@@ -21,8 +21,8 @@
     {{-- Hero: the tally is the thesis --}}
     <div class="mb-8">
         <p class="font-mono text-[11px] uppercase tracking-widest text-gray-400 mb-3">Konflik Terpantau</p>
-        <div class="flex items-end gap-4">
-            <span class="font-mono text-6xl font-semibold text-gray-900 tabular-nums leading-none">
+        <div class="flex flex-wrap items-end gap-4">
+            <span class="font-mono text-[clamp(2.25rem,7vh,3.75rem)] font-semibold text-gray-900 tabular-nums leading-none">
                 {{ $fmt($stats['konflik']) }}
             </span>
             <span class="text-sm text-gray-500 pb-1.5">konflik tercatat</span>

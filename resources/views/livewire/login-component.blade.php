@@ -29,7 +29,7 @@
     }
 @endphp
 
-<div class="jkl-root relative flex min-h-screen items-center justify-center overflow-hidden p-6">
+<div class="jkl-root relative flex min-h-screen items-center justify-center overflow-x-hidden overflow-y-auto p-6">
     <style>
         .jkl-root { background: radial-gradient(130% 100% at 50% 0%, #1f1f1f 0%, #0f0f0f 55%, #0a0a0a 100%); }
         .jkl-scrim {

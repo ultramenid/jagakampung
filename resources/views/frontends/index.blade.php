@@ -14,10 +14,20 @@
                 ['id' => 'pbph', 'name' => 'Konsesi PBPH', 'checked' => false],
             ];
         @endphp
-        <aside class="w-80 h-screen flex flex-col border-r border-gray-200 bg-white">
+        {{-- overflow-y-auto di rail-nya sendiri: pasangan dari min-h pada daftar
+             konflik di bawah. Di viewport sangat pendek (mis. laptop 1280×720 pada
+             zoom 125% = 576px CSS) chrome tetap butuh ~440px; daripada daftar
+             konflik diremas jadi 1 baris, rail-nya yang menggulir. --}}
+        <aside class="w-80 h-screen flex flex-col overflow-y-auto border-r border-gray-200 bg-white">
 
             {{-- Masthead — same dark console chrome as the CMS + login --}}
-            <div class="flex-shrink-0 px-6 pt-6 pb-5 bg-[#0f0f0f] text-white" style="background-image: radial-gradient(140% 200% at 0% 0%, #1f1f1f 0%, #0f0f0f 62%);">
+            {{-- ponytail: vertical rhythm here is fluid (clamp + vh), not fixed.
+                 Browser zoom shrinks the CSS viewport (125% on a 1440px screen =
+                 1152×720 CSS), and with fixed padding the flex-shrink-0 blocks ate
+                 535px of a 720px rail — leaving ~140px for the conflict list.
+                 clamp() shrinks them continuously, so every zoom level works, not
+                 just one breakpoint. --}}
+            <div class="flex-shrink-0 px-6 pt-[clamp(1rem,2.6vh,1.5rem)] pb-[clamp(0.75rem,2.2vh,1.25rem)] bg-[#0f0f0f] text-white" style="background-image: radial-gradient(140% 200% at 0% 0%, #1f1f1f 0%, #0f0f0f 62%);">
                 <a href="#" class="text-xl font-semibold tracking-tight text-white">
                     Jagakampung<span class="font-mono text-gray-500">.id</span>
                 </a>
@@ -31,7 +41,7 @@
             </div>
 
             {{-- Caseload — the thesis: how big, how active --}}
-            <div class="flex-shrink-0 px-6 pt-5 pb-6 border-b border-gray-100">
+            <div class="flex-shrink-0 px-6 pt-[clamp(0.75rem,2.2vh,1.25rem)] pb-[clamp(0.875rem,2.6vh,1.5rem)] border-b border-gray-100">
                 <div class="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider text-gray-400">
                     <span>Status konflik</span>
                     <span class="tabular-nums">{{ $stats['total'] }} titik · {{ $stats['provinsi'] }} provinsi</span>
@@ -48,30 +58,30 @@
                 </div>
 
                 {{-- scale: land + people --}}
-                <div class="mt-5 pt-4 border-t border-gray-100 space-y-4">
+                <div class="mt-[clamp(0.75rem,2.2vh,1.25rem)] pt-[clamp(0.625rem,1.8vh,1rem)] border-t border-gray-100 space-y-[clamp(0.625rem,1.8vh,1rem)]">
                     <div class="min-w-0">
-                        <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ number_format(round($stats['luas']), 0, ',', '.') }}</p>
-                        <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Hektar terdampak</p>
+                        <p class="font-mono text-[clamp(1.125rem,2.6vh,1.5rem)] text-gray-900 tabular-nums leading-none truncate">{{ number_format(round($stats['luas']), 0, ',', '.') }}</p>
+                        <p class="mt-1 text-[10px] text-gray-400 leading-tight">Hektar terdampak</p>
                     </div>
                     <div class="flex items-end gap-6">
                         <div class="min-w-0">
-                            <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ number_format($stats['kk'], 0, ',', '.') }}</p>
-                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">KK terdampak</p>
+                            <p class="font-mono text-[clamp(1.125rem,2.6vh,1.5rem)] text-gray-900 tabular-nums leading-none truncate">{{ number_format($stats['kk'], 0, ',', '.') }}</p>
+                            <p class="mt-1 text-[10px] text-gray-400 leading-tight">KK terdampak</p>
                         </div>
                         <div class="min-w-0">
-                            <p class="font-mono text-2xl text-gray-900 tabular-nums leading-none truncate">{{ number_format($stats['jiwa'], 0, ',', '.') }}</p>
-                            <p class="mt-1.5 text-[10px] text-gray-400 leading-tight">Jiwa terdampak</p>
+                            <p class="font-mono text-[clamp(1.125rem,2.6vh,1.5rem)] text-gray-900 tabular-nums leading-none truncate">{{ number_format($stats['jiwa'], 0, ',', '.') }}</p>
+                            <p class="mt-1 text-[10px] text-gray-400 leading-tight">Jiwa terdampak</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- Layers --}}
-            <div class="flex-shrink-0 px-6 py-5 border-b border-gray-100">
+            <div class="flex-shrink-0 px-6 py-[clamp(0.75rem,2.2vh,1.25rem)] border-b border-gray-100">
                 <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mb-2">Layers</p>
                 <div class="flex flex-col">
                     @foreach ($layers as $l)
-                        <label class="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-md hover:bg-gray-50 has-[:focus-visible]:bg-gray-50 transition cursor-pointer select-none">
+                        <label class="flex items-center gap-2.5 px-2 py-[clamp(0.25rem,0.9vh,0.375rem)] -mx-2 rounded-md hover:bg-gray-50 has-[:focus-visible]:bg-gray-50 transition cursor-pointer select-none">
                             <span class="flex-1 text-[13px] text-gray-700">{{ __($l['name']) }}</span>
                             <span class="relative flex flex-shrink-0">
                                 <input type="checkbox" id="{{ $l['id'] }}" class="peer sr-only" @checked($l['checked'])>
@@ -84,8 +94,8 @@
             </div>
 
             {{-- Case list --}}
-            <div class="flex-1 flex flex-col min-h-0">
-                <div class="flex-shrink-0 px-6 pt-5 pb-2 flex items-baseline justify-between">
+            <div class="flex-1 flex flex-col min-h-48">
+                <div class="flex-shrink-0 px-6 pt-[clamp(0.625rem,1.8vh,1.25rem)] pb-2 flex items-baseline justify-between">
                     <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400">Daftar Konflik</p>
                     <span class="font-mono text-[10px] text-gray-300 tabular-nums">{{ count($konfliks) }}</span>
                 </div>
@@ -94,7 +104,7 @@
                         @php $isAktif = $k->status === 'aktif'; @endphp
                         <button type="button"
                             onclick="focusKonflik({{ $k->id }}, {{ $k->lat }}, {{ $k->long }})"
-                            class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 transition group">
+                            class="w-full text-left flex items-center gap-3 px-3 py-[clamp(0.375rem,1.2vh,0.625rem)] rounded-md hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 transition group">
                             <span aria-hidden="true" class="w-2 h-2 rounded-full flex-shrink-0 {{ $isAktif ? 'bg-status-aktif' : 'bg-status-potensi' }}"></span>
                             <span class="min-w-0 flex-1">
                                 <span class="flex items-baseline justify-between gap-2">
@@ -116,7 +126,7 @@
             </div>
 
             {{-- Provenance --}}
-            <div class="flex-shrink-0 px-6 py-3 border-t border-gray-100">
+            <div class="flex-shrink-0 px-6 py-[clamp(0.5rem,1.4vh,0.75rem)] border-t border-gray-100">
                 <p class="font-mono text-[10px] text-gray-300 tracking-wide">Data · Auriga Nusantara</p>
             </div>
         </aside>
@@ -158,7 +168,9 @@
                 ['label' => 'Tubuh Air', 'color' => '#0000ff'],
             ];
         @endphp
-        <div id="wmsLegends" class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
+        {{-- max-h + scroll: 8 entri Kawasan Hutan lebih tinggi dari sisa layar
+             begitu viewport memendek (jendela kecil / browser di-zoom). --}}
+        <div id="wmsLegends" class="fixed top-6 right-6 bottom-20 z-[9999] flex flex-col gap-3 pointer-events-none overflow-y-auto">
             <div id="kawasanhutan-legend" class="hidden pointer-events-auto bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl px-4 py-3 shadow-geist text-[11px] text-gray-600 min-w-40">
                 <p class="font-mono text-[10px] uppercase tracking-wider text-gray-400 mb-2">Kawasan Hutan</p>
                 <div class="flex flex-col gap-1.5">

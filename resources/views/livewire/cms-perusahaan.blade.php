@@ -19,7 +19,7 @@
         <input wire:model.live="search" type="search" placeholder="Cari perusahaan…" class="gk-input sm:w-64">
     </div>
 
-    <div class="gk-card overflow-hidden">
+    <div class="gk-card overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-gray-100">

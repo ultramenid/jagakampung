@@ -1,10 +1,26 @@
 // INIT MAP
+// Framing awal = seluruh Indonesia (Aceh–Nusa Tenggara–Sulawesi), konsisten
+// apa pun isi datanya. Dipasang lewat fitBounds, BUKAN angka zoom mati: zoom
+// yang di-hardcode hanya benar untuk satu ukuran layar. Viewport CSS mengecil
+// baik saat jendela dikecilkan MAUPUN saat browser di-zoom (125% pada layar
+// 1440×900 = 1152×720 CSS), dan pada zoom tetap, wilayah di tepi ikut
+// terpotong. fitBounds menghitung ulang dari ukuran container saat itu, jadi
+// framing-nya sama di semua ukuran layar dan semua level zoom browser.
+const INDONESIA_BOUNDS = L.latLngBounds([-11.0, 94.5], [9.5, 138.0]);
+
+// minZoom 4 (dari 6): pada viewport sempit, framing se-Indonesia di atas butuh
+// zoom < 6. Karena zoomControl dimatikan, kalau ter-clamp pengguna tidak punya
+// cara mengecilkan peta sendiri.
+// zoomSnap 0.25: default-nya 1, yang membuat fitBounds selalu dibulatkan ke
+// BAWAH ke zoom bulat — bisa kehilangan sampai ~2x skala, jadi Indonesia tampil
+// kecil dengan sisa laut di kiri-kanan. Dengan langkah 0.25, fitBounds mendarat
+// nyaris persis di bounds sehingga wilayahnya benar-benar memenuhi frame.
 const map = L.map("map", {
-    center: [-0.7893, 109.9213],
-    zoom: 6,
-    minZoom: 6,
+    minZoom: 4,
+    zoomSnap: 0.25,
     zoomControl: false,
 });
+map.fitBounds(INDONESIA_BOUNDS);
 
 let markersAktif = [];
 let markersPotensi = [];
