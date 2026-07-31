@@ -11,7 +11,7 @@ class IndexController extends Controller
     // Layers the map is allowed to query — keeps this proxy from becoming an open WMS relay
     private const WMS_LAYERS = [
         'jagamkampung:KH2025',
-        'jagamkampung:PBPH_2025',
+        'jagamkampung:PBPH_JULI2026',
     ];
 
     public function wmsFeatureInfo(Request $request)
