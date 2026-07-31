@@ -337,7 +337,7 @@ map.on("click", async function (e) {
             </div>
             <h2 class="font-semibold text-sm text-white leading-tight">Info Layer</h2>
         </div>
-        <div class="h-[min(24rem,56vh)] overflow-y-auto p-4">
+        <div class="max-h-[min(24rem,56vh)] overflow-y-auto p-4">
             ${cards.map((c, i) => (i > 0 ? `<div class="pt-4 border-t border-gray-200">${c}</div>` : c)).join("")}
         </div>
     </div>`;
