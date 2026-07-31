@@ -9,6 +9,7 @@ use App\Http\Controllers\{
     InstansiController,
     KonflikController,
     LocalServiceController,
+    PbphController,
     PerusahaanController,
     UsersController,
 };
@@ -73,6 +74,7 @@ Route::middleware([checkSession::class])->group(function () {
         ]);
         Route::get("/cms/tambah-user", [UsersController::class, "add"]);
         Route::get("/cms/tambah-instansi", [InstansiController::class, "add"]);
+        Route::get("/cms/tambah-pbph", [PbphController::class, "add"]);
 
         Route::get("/cms/editgroup/{id}", [GrupController::class, "edit"]);
         Route::get("/cms/editperusahaan/{id}", [
@@ -84,11 +86,13 @@ Route::middleware([checkSession::class])->group(function () {
             InstansiController::class,
             "edit",
         ]);
+        Route::get("/cms/editpbph/{id}", [PbphController::class, "edit"]);
 
         Route::get("/cms/group", [GrupController::class, "index"]);
         Route::get("/cms/perusahaan", [PerusahaanController::class, "index"]);
         Route::get("/cms/users", [UsersController::class, "index"]);
         Route::get("/cms/instansi", [InstansiController::class, "index"]);
+        Route::get("/cms/pbph", [PbphController::class, "index"]);
     });
 });
 

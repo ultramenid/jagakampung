@@ -292,9 +292,11 @@ map.on("mousemove", function (e) {
 
         try {
             const results = await Promise.all(
-                activeWmsKeys().map((key) => fetchWmsFeatureInfo(key, point, size, bbox, { signal: hoverAbort.signal }))
+                activeWmsKeys().map((key) =>
+                    fetchWmsFeatureInfo(key, point, size, bbox, { signal: hoverAbort.signal }).then((features) => ({ key, features }))
+                )
             );
-            map.getContainer().classList.toggle("wms-hover", results.some((f) => f.length));
+            map.getContainer().classList.toggle("wms-hover", results.some(({ features }) => features.length));
         } catch {
             // aborted by a newer hover probe — ignore
         }
@@ -319,32 +321,145 @@ map.on("click", async function (e) {
     // now-inactive layer's info never shows up in the popup.
     const stillActive = new Set(activeWmsKeys());
 
-    const sections = results
+    const cards = results
         .filter(({ key }) => stillActive.has(key))
-        .map(({ key, features }) => {
-            const values = [...new Set(features.map((f) => f.properties?.[wmsInfoFields[key]]).filter(Boolean))].map(
-                (v) => wmsValueLabels[key]?.[v] ?? v
-            );
-            return values.length ? { label: wmsLabels[key], color: wmsColors[key], values } : null;
-        })
+        .map(({ key, features }) => (key === "pbph" ? pbphCard(features) : kawasanCard(key, features)))
         .filter(Boolean);
 
-    if (!sections.length) return;
+    if (!cards.length) return;
 
-    const html = `<div class="px-2.5 py-2 min-w-[130px] space-y-1">${sections
-        .map(
-            (s, i) => `<div class="flex items-start gap-1.5${i > 0 ? " pt-1 border-t border-gray-100" : ""}">
-                <span aria-hidden="true" class="w-1.5 h-1.5 mt-1 rounded-full flex-shrink-0" style="background:${s.color}"></span>
-                <span class="text-[11px] leading-tight text-gray-700">
-                    <span class="font-mono text-[9px] uppercase tracking-wider text-gray-400">${esc(s.label)}</span><br>
-                    <span class="font-medium text-gray-900">${s.values.map(esc).join(", ")}</span>
-                </span>
-            </div>`
-        )
-        .join("")}</div>`;
+    const html = `<div class="w-[19rem] max-w-full">
+        <div class="flex items-center gap-2.5 px-4 py-3 bg-gray-900 rounded-t-[9px]">
+            <div class="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <h2 class="font-semibold text-sm text-white leading-tight">Info Layer</h2>
+        </div>
+        <div class="h-[min(24rem,56vh)] overflow-y-auto p-4">
+            ${cards.map((c, i) => (i > 0 ? `<div class="pt-4 border-t border-gray-200">${c}</div>` : c)).join("")}
+        </div>
+    </div>`;
 
-    L.popup({ className: "gk-popup", maxWidth: 220, autoPanPadding: [20, 20] }).setLatLng(e.latlng).setContent(html).openOn(map);
+    L.popup({ className: "gk-popup", maxWidth: 340, autoPanPadding: [20, 20] })
+        .setLatLng(e.latlng)
+        .setContent(html)
+        .openOn(map);
 });
+
+/* ── ISI POPUP ────────────────────────────────────────────────────────────
+   Pola visualnya mengikuti panel kiri: label bagian mono huruf besar, angka
+   besar tabular dengan keterangan kecil di bawahnya, dan garis rambut sebagai
+   pemisah. Dari layer hanya nama perusahaan yang dipakai; sisanya data PBPH
+   hasil kurasi di CMS. Konsesi yang belum diriset tidak dimunculkan. */
+
+const isi = (v) => v !== null && v !== undefined && String(v).trim() !== "";
+
+const formatHa = (v) => Number(v).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Label bagian; `kanan` mengisi sisi kanan seperti "7 titik · 4 provinsi" di panel kiri
+function labelBagian(teks, kanan) {
+    return `<div class="flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-wider text-gray-400">
+        <span>${esc(teks)}</span>
+        ${kanan ? `<span class="tabular-nums">${esc(kanan)}</span>` : ""}
+    </div>`;
+}
+
+const bagian = (isiHtml) => `<div class="pt-2.5 mt-2.5 border-t border-gray-100">${isiHtml}</div>`;
+
+// Keterangan di atas, nilainya di bawah — muat untuk nomor SK yang panjang
+function barisData(label, nilai) {
+    if (!isi(nilai)) return "";
+    return `<div>
+        <p class="text-[10px] text-gray-400 leading-tight">${esc(label)}</p>
+        <p class="mt-0.5 text-[13px] text-gray-700 leading-snug break-words whitespace-pre-line">${esc(nilai)}</p>
+    </div>`;
+}
+
+// Nama orang pendek — dua kolom, seperti pasangan angka di panel kiri
+function barisPasangan(label, nilai) {
+    if (!isi(nilai)) return "";
+    return `<div class="flex gap-3">
+        <span class="text-[10px] text-gray-400 w-[84px] flex-shrink-0 pt-0.5">${esc(label)}</span>
+        <span class="text-[13px] text-gray-700 flex-1 min-w-0 leading-snug break-words whitespace-pre-line">${esc(nilai)}</span>
+    </div>`;
+}
+
+function tautanLampiran(l) {
+    const ext = (l.berkas || "").split(".").pop().toLowerCase();
+    return `<a href="${esc(l.url)}" target="_blank" rel="noopener"
+        class="flex items-baseline gap-2 py-1 group">
+        <span class="font-mono text-[9px] uppercase text-gray-400 w-8 flex-shrink-0">${esc(ext || "file")}</span>
+        <span class="text-[13px] text-gray-700 group-hover:text-gray-900 group-hover:underline break-words">${esc(l.nama)}</span>
+    </a>`;
+}
+
+function kawasanCard(key, features) {
+    const nilai = [...new Set(features.map((f) => f.properties?.[wmsInfoFields[key]]).filter(Boolean))].map(
+        (v) => wmsValueLabels[key]?.[v] ?? v
+    );
+    if (!nilai.length) return null;
+
+    return `${labelBagian(wmsLabels[key])}
+        <p class="mt-1 text-sm font-semibold text-gray-900 leading-snug break-words pr-4">${esc(nilai.join(", "))}</p>`;
+}
+
+function pbphCard(features) {
+    const terlihat = new Set();
+    const kartu = [];
+
+    for (const f of features) {
+        const p = f.properties ?? {};
+        // nama perusahaan dari layer selalu tampil; bagian lain menyusul kalau
+        // konsesinya sudah punya data di CMS
+        const info = p.info ?? null;
+        if (!isi(p.namobj)) continue;
+
+        // satu konsesi bisa terpecah jadi beberapa poligon
+        const kunci = p.kode_pbph || p.namobj;
+        if (terlihat.has(kunci)) continue;
+        terlihat.add(kunci);
+
+        const blok = [
+            `${labelBagian(wmsLabels.pbph)}
+             <h2 class="mt-1 text-sm font-semibold text-gray-900 leading-snug break-words pr-4">${esc(p.namobj)}</h2>`,
+        ];
+
+        if (info && isi(info.luas)) {
+            blok.push(
+                bagian(`<p class="font-mono text-[1.5rem] text-gray-900 tabular-nums leading-none truncate">${esc(formatHa(info.luas))}</p>
+                    <p class="mt-1 text-[10px] text-gray-400 leading-tight">Hektare konsesi</p>`)
+            );
+        }
+
+        const izin = info ? [barisData("Pertama", info.izin_pertama), barisData("Saat ini", info.izin_saat_ini)].join("") : "";
+        if (izin) blok.push(bagian(`${labelBagian("Izin")}<div class="mt-1.5 space-y-1.5">${izin}</div>`));
+
+        const pemilik = info
+            ? [
+                  barisPasangan("Komisaris", info.komisaris),
+                  barisPasangan("Direktur utama", info.direktur_utama),
+                  barisPasangan("Direktur", info.direktur),
+              ].join("")
+            : "";
+        if (pemilik) blok.push(bagian(`${labelBagian("Pemilik")}<div class="mt-1.5 space-y-1.5">${pemilik}</div>`));
+
+        const lampiran = info?.lampiran ?? [];
+        if (lampiran.length) {
+            blok.push(
+                bagian(`${labelBagian("Lampiran", String(lampiran.length))}
+                    <div class="mt-1.5">${lampiran.map(tautanLampiran).join("")}</div>`)
+            );
+        }
+
+        kartu.push(blok.join(""));
+    }
+
+    if (!kartu.length) return null;
+
+    return kartu.map((c, i) => (i > 0 ? `<div class="pt-4 mt-4 border-t border-gray-200">${c}</div>` : c)).join("");
+}
 
 // LOADING SIDEBAR
 function showLoading() {

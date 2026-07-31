@@ -76,9 +76,9 @@
         class="fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-white shadow-geist z-40 transition-transform duration-300 ease-in-out flex flex-col">
 
         {{-- Sidebar Header --}}
-        <div class="flex-shrink-0 px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+        <div class="flex-shrink-0 px-5 py-4 border-b border-gray-800 flex items-center justify-between bg-gray-900">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-md bg-gray-900 flex items-center justify-center flex-shrink-0">
+                <div class="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 20 20"
                         fill="currentColor">
                         <path fill-rule="evenodd"
@@ -87,12 +87,12 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="font-semibold text-sm text-gray-900 leading-tight">Detail Konflik</h2>
+                    <h2 class="font-semibold text-sm text-white leading-tight">Detail Konflik</h2>
                     <p class="text-[11px] text-gray-400">Klik marker untuk melihat detail</p>
                 </div>
             </div>
             <button onclick="closeSidebar()"
-                class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition cursor-pointer">
+                class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white/10 text-gray-400 hover:text-white transition cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                         d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"

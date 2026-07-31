@@ -9,6 +9,7 @@
                     ['key' => 'grup',       'href' => '/cms/group',      'label' => 'Group'],
                     ['key' => 'perusahaan', 'href' => '/cms/perusahaan', 'label' => 'Perusahaan'],
                     ['key' => 'instansi',   'href' => '/cms/instansi',   'label' => 'Lembaga'],
+                    ['key' => 'pbph',       'href' => '/cms/pbph',       'label' => 'PBPH'],
                 ];
 
                 if (session('role_id') == 0) {

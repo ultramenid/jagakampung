@@ -135,6 +135,11 @@
 .gk-popup .leaflet-popup-content {
     margin: 0;
 }
+/* Leaflet memasang `margin: 18px 0` ke tiap <p> di dalam popup — jarak antar
+   baris kartu jadi melar. Spasi diatur lewat utility di markup, bukan di sini. */
+.gk-popup .leaflet-popup-content p {
+    margin: 0;
+}
 .gk-popup .leaflet-popup-tip-container {
     filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.03));
 }
@@ -146,11 +151,11 @@
     border-left: none;
 }
 .gk-popup .leaflet-popup-close-button {
-    top: 8px !important;
-    right: 8px !important;
-    color: var(--color-gray-300) !important;
+    top: 10px !important;
+    right: 10px !important;
+    color: rgba(255, 255, 255, 0.7) !important;
     font: unset !important;
 }
 .gk-popup .leaflet-popup-close-button:hover {
-    color: var(--color-gray-600) !important;
+    color: #fff !important;
 }
