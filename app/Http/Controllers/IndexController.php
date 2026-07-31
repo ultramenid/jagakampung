@@ -58,10 +58,10 @@ class IndexController extends Controller
     }
 
     /**
-     * Sisipkan info kurasi PBPH (dari CMS) + daftar konflik terkait ke properti tiap
-     * feature, supaya popup peta tidak perlu request kedua. Konsesi tanpa data info
-     * dibiarkan apa adanya. Konflik dikaitkan lewat nama perusahaan dan hanya yang
-     * tampil di peta (aktif/potensi) — draft tetap privat pemiliknya.
+     * Sisipkan info kurasi PBPH (dari CMS) ke properti tiap feature, supaya popup
+     * peta tidak perlu request kedua. Konsesi tanpa data info dibiarkan apa adanya.
+     * Konflik tidak ikut dikirim ke popup peta — endpoint ini publik, sedangkan
+     * data konflik tunduk pada aturan "draft cuma untuk pemiliknya".
      */
     private function enrichPbph(array $features): array
     {
@@ -69,16 +69,6 @@ class IndexController extends Controller
         $infos = $codes->isNotEmpty()
             ? DB::table('pbph_info')->whereIn('kode_pbph', $codes)->get()->keyBy('kode_pbph')
             : collect();
-
-        // ponytail: konflik diambil semua (jumlahnya kecil) lalu dicocokkan di PHP
-        // dengan contains case-insensitive dua arah — portabel lintas DB (ILIKE cuma
-        // Postgres) dan menampung beda kapital/spasi/ bentuk pendek. Kalau tabel
-        // konflik membesar, pindahkan ke WHERE ... ILIKE per namobj.
-        $konfliks = DB::table('konflik')
-            ->whereIn('status', ['aktif', 'potensi'])
-            ->orderByRaw("CASE status WHEN 'aktif' THEN 0 WHEN 'potensi' THEN 1 ELSE 2 END")
-            ->orderByDesc('luas')
-            ->get(['id', 'perusahaan', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'status', 'lat', 'long']);
 
         $lampirans = $infos->isNotEmpty()
             ? DB::table('pbph_lampiran')
@@ -89,57 +79,30 @@ class IndexController extends Controller
             : collect();
 
         foreach ($features as $i => $feature) {
-            $props = $feature['properties'] ?? [];
-
-            $info = $infos->get($props['kode_pbph'] ?? null);
-            if ($info) {
-                $features[$i]['properties']['info'] = [
-                    'nama_perusahaan' => $info->nama_perusahaan,
-                    'izin_pertama' => $info->izin_pertama,
-                    'izin_saat_ini' => $info->izin_saat_ini,
-                    'luas' => $info->luas === null ? null : (float) $info->luas,
-                    'komisaris' => $info->komisaris,
-                    'direktur_utama' => $info->direktur_utama,
-                    'direktur' => $info->direktur,
-                    'lampiran' => $lampirans->get($info->id, collect())
-                        ->map(fn ($l) => [
-                            'nama' => $l->nama,
-                            'berkas' => $l->file,
-                            'url' => Storage::url('pbph-lampiran/'.$l->file),
-                        ])
-                        ->values(),
-                ];
+            $info = $infos->get($feature['properties']['kode_pbph'] ?? null);
+            if (! $info) {
+                continue;
             }
 
-            $nama = $props['namobj'] ?? null;
-            $matched = $konfliks->filter(fn ($r) => self::namaMirip($nama, $r->perusahaan))->values();
-            if ($matched->isNotEmpty()) {
-                $features[$i]['properties']['konflik'] = $matched->map(fn ($r) => [
-                    'id' => $r->id,
-                    'desa' => $r->desa,
-                    'kecamatan' => $r->kecamatan,
-                    'kabkota' => $r->kabkota,
-                    'provinsi' => $r->provinsi,
-                    'status' => $r->status,
-                    'lat' => $r->lat,
-                    'long' => $r->long,
-                ])->values()->all();
-            }
+            $features[$i]['properties']['info'] = [
+                'nama_perusahaan' => $info->nama_perusahaan,
+                'izin_pertama' => $info->izin_pertama,
+                'izin_saat_ini' => $info->izin_saat_ini,
+                'luas' => $info->luas === null ? null : (float) $info->luas,
+                'komisaris' => $info->komisaris,
+                'direktur_utama' => $info->direktur_utama,
+                'direktur' => $info->direktur,
+                'lampiran' => $lampirans->get($info->id, collect())
+                    ->map(fn ($l) => [
+                        'nama' => $l->nama,
+                        'berkas' => $l->file,
+                        'url' => Storage::url('pbph-lampiran/'.$l->file),
+                    ])
+                    ->values(),
+            ];
         }
 
         return $features;
-    }
-
-    /** Cocokkan nama perusahaan secara contains case-insensitive dua arah. */
-    private static function namaMirip(string|null $a, string|null $b): bool
-    {
-        $a = preg_replace('/\s+/', ' ', trim(mb_strtolower((string) $a)));
-        $b = preg_replace('/\s+/', ' ', trim(mb_strtolower((string) $b)));
-        if ($a === '' || $b === '') {
-            return false;
-        }
-
-        return $a === $b || str_contains($a, $b) || str_contains($b, $a);
     }
 
     public function index(){

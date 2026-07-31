@@ -463,32 +463,8 @@ class PbphTest extends TestCase
         // atribut asli dari layer tetap utuh
         $this->assertSame('PBPH HP', $props['jenis']);
         $this->assertSame([], $props['info']['lampiran']);
-        // tidak ada konflik berisi perusahaan ini → key konflik tidak ikut
+        // konflik tidak ikut ke popup peta
         $this->assertArrayNotHasKey('konflik', $props);
-    }
-
-    public function test_map_popup_lists_konflik_matched_by_perusahaan(): void
-    {
-        $this->fakeFeatureInfo();
-        $this->seedPbphInfo();
-        $aktif = $this->seedKonflik(['desa' => 'Desa Aktif', 'perusahaan' => 'PT PUTRADUTA INDAH WOOD', 'status' => 'aktif']);
-        $potensi = $this->seedKonflik(['desa' => 'Desa Potensi', 'perusahaan' => 'PT PUTRADUTA INDAH WOOD', 'status' => 'potensi']);
-        // bentuk pendek & beda kapital tetap cocok (contains case-insensitive dua arah)
-        $singkat = $this->seedKonflik(['desa' => 'Desa Singkat', 'perusahaan' => 'putraduta indah', 'status' => 'aktif']);
-        // perusahaan lain tidak ikut, draft tetap privat
-        $this->seedKonflik(['desa' => 'Desa Lain', 'perusahaan' => 'PT LAIN', 'status' => 'aktif']);
-        $this->seedKonflik(['desa' => 'Desa Rahasia', 'perusahaan' => 'PT PUTRADUTA INDAH WOOD', 'status' => 'draft']);
-
-        $konflik = $this->get($this->featureInfoUrl())
-            ->assertStatus(200)
-            ->json('features.0.properties.konflik');
-
-        $ids = array_column($konflik, 'id');
-        $this->assertContains($aktif, $ids);
-        $this->assertContains($potensi, $ids);
-        $this->assertContains($singkat, $ids);
-        $this->assertNotContains('Desa Lain', array_column($konflik, 'desa'));
-        $this->assertNotContains('Desa Rahasia', array_column($konflik, 'desa'));
     }
 
     public function test_map_popup_includes_attachments(): void
