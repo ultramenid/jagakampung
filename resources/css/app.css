@@ -132,8 +132,12 @@
     border: 1px solid var(--color-gray-200);
     box-shadow: var(--shadow-geist-sm);
 }
+/* max-height/overflow di-nol-kan: popup ini sengaja tumbuh setinggi isinya,
+   tanpa gulir di dalam. */
 .gk-popup .leaflet-popup-content {
     margin: 0;
+    max-height: none;
+    overflow: visible;
 }
 /* Leaflet memasang `margin: 18px 0` ke tiap <p> di dalam popup — jarak antar
    baris kartu jadi melar. Spasi diatur lewat utility di markup, bukan di sini. */
