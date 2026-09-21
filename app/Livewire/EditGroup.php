@@ -14,15 +14,21 @@ class EditGroup extends Component
 
     public function mount($idDB)
     {
+        if (! session('id') || (int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         $this->idGroup = $idDB;
         $data = DB::table('groups')->where('id', $this->idGroup)->first();
+        if (! $data) {
+            abort(404);
+        }
         $this->nama = $data->nama;
         $this->deskripsi = $data->deskripsi;
     }
 
 
     public function storeDatabase(){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         if($this->manualValidation()){

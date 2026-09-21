@@ -21,7 +21,7 @@ class TambahUser extends Component
     }
 
     public function storeDatabase(){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         if($this->manualValidation()){

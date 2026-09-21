@@ -42,9 +42,9 @@
                                    class="block px-4 py-2.5 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors">
                                     @php
                                         $query = trim($cariKonsesi);
-                                        $nama = $konsesi['namobj'];
+                                        $nama = e($konsesi['namobj']);
                                         $highlighted = $query !== ''
-                                            ? preg_replace('/' . preg_quote($query, '/') . '/i', '<strong class="font-semibold text-gray-900">$0</strong>', $nama)
+                                            ? preg_replace('/' . preg_quote(e($query), '/') . '/i', '<strong class="font-semibold text-gray-900">$0</strong>', $nama)
                                             : $nama;
                                     @endphp
                                     {!! $highlighted !!}

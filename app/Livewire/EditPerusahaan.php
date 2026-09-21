@@ -12,15 +12,21 @@ class EditPerusahaan extends Component
     public $idPerusahaan, $perusahaan, $group, $deskripsi;
 
     public function mount($idDB){
+        if (! session('id') || (int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         $this->idPerusahaan = $idDB;
         $data = DB::table('perusahaans')->where('id', $this->idPerusahaan)->first();
+        if (! $data) {
+            abort(404);
+        }
         $this->perusahaan = $data->perusahaan;
         $this->group = $data->group;
         $this->deskripsi = $data->deskripsi;
     }
 
     public function storeDatabase(){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         if($this->manualValidation()){

@@ -17,12 +17,16 @@ class CmsPbph extends Component
     // ponytail: daftar dibaca dari tabel lokal saja — GeoServer hanya dipanggil di
     // form tambah, supaya GeoServer down tidak mematikan halaman CMS ini.
     public function getPbph(){
+        $allowedFields = ['nama_perusahaan', 'kode_pbph', 'luas', 'izin_pertama', 'izin_saat_ini', 'komisaris', 'direktur_utama', 'direktur'];
+        $field = in_array($this->dataField, $allowedFields, true) ? $this->dataField : 'nama_perusahaan';
+        $order = strtolower($this->dataOrder) === 'desc' ? 'desc' : 'asc';
+
         return DB::table('pbph_info')
             ->where(function ($q) {
                 $q->where('nama_perusahaan', 'like', '%'.$this->search.'%')
                   ->orWhere('kode_pbph', 'like', '%'.$this->search.'%');
             })
-            ->orderBy($this->dataField, $this->dataOrder)
+            ->orderBy($field, $order)
             ->paginate($this->paginate);
     }
 
@@ -70,7 +74,7 @@ class CmsPbph extends Component
 
     // Livewire tidak melewati middleware route, jadi peran dicek ulang di sini.
     private function authorizeAdmin(){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
     }

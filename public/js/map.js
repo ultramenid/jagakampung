@@ -42,6 +42,11 @@ let selectedKonflikId = null;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Format integer with thousands separators (id-ID, matches the case-list format).
 const fmtNum = (n) => (n !== null && n !== undefined && n !== '' && !isNaN(Number(n))) ? Number(n).toLocaleString('id-ID') : '—';
+// Validate URL scheme to prevent javascript: or unsafe schemes from executing
+const safeUrl = (url) => {
+    const s = String(url ?? '').trim();
+    return /^https?:\/\//i.test(s) ? esc(s) : '#';
+};
 
 // SIDEBAR
 const sidebar = document.getElementById("sidebar");
@@ -152,32 +157,24 @@ window.focusKonflik = function (id, lat, lng, skipClusterCheck) {
     }, 300);
 };
 
-// BASEMAP
-const baseLayers = [
-    {
-        url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        icon: "../assets/osm.png",
-        addToMap: true,
-    },
-];
+// BASEMAP — CARTO Positron Vector Basemap (matching dashboard.kabupatenlestari.org)
+const CARTO_POSITRON_STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 
-const baseLayerConfigs = baseLayers.map((b) => {
-    const layer = L.tileLayer(b.url, {
+let basemapLayer;
+if (typeof L.maplibreGL !== "undefined") {
+    basemapLayer = L.maplibreGL({
+        style: CARTO_POSITRON_STYLE,
+        attribution: "Auriga Nusantara | Jagakampung",
+    });
+} else {
+    basemapLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        subdomains: "abcd",
+        maxZoom: 20,
         attribution: "Auriga Nusantara | Jagakampung",
         detectRetina: true,
-        maxNativeZoom: 17,
     });
-
-    if (b.addToMap) {
-        layer.addTo(map);
-    }
-
-    return { layer, icon: b.icon, name: "" };
-});
-
-if (typeof L.bmSwitcher !== "undefined") {
-    new L.bmSwitcher(baseLayerConfigs, { position: "bottomleft" }).addTo(map);
 }
+basemapLayer.addTo(map);
 
 // WMS LAYERS
 const wmsLayers = {
@@ -735,7 +732,7 @@ function renderSidebar(data) {
                     .map(
                         (item) => `
 
-                <a href="${esc(item.sumber ?? "#")}"
+                <a href="${safeUrl(item.sumber)}"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="block border border-gray-100 rounded-xl overflow-hidden hover:border-gray-300 hover:bg-gray-50 transition">

@@ -15,9 +15,12 @@ class CmsPerusahaan extends Component
 
 
     public function getPerusahaan(){
+        $allowedFields = ['id', 'perusahaan', 'group'];
+        $field = in_array($this->dataField, $allowedFields, true) ? $this->dataField : 'perusahaan';
+        $order = strtolower($this->dataOrder) === 'desc' ? 'desc' : 'asc';
         $query = DB::table('perusahaans')
             ->where('perusahaan', 'like', '%'.$this->search.'%')
-            ->orderBy($this->dataField, $this->dataOrder);
+            ->orderBy($field, $order);
         $databases = $query->paginate($this->paginate);
         return $databases;
     }
@@ -33,7 +36,7 @@ class CmsPerusahaan extends Component
         $this->deleteID = null;
     }
     public function delete($id){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
 
@@ -45,7 +48,7 @@ class CmsPerusahaan extends Component
         $this->deleter = true;
     }
     public function deleting($id){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         DB::table('perusahaans')->where('id', $id)->delete();

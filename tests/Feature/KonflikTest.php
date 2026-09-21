@@ -356,4 +356,58 @@ class KonflikTest extends TestCase
             'nama' => 'BPN',
         ]);
     }
+
+    public function test_can_create_konflik_with_nama_kelompok(): void
+    {
+        $this->loginAsAdmin();
+        $this->seedGroup('Test Group');
+        $this->seedPerusahaan('Test Group', 'Test Perusahaan');
+
+        Livewire::test(\App\Livewire\TambahKonflik::class)
+            ->set('provinsi', 'Jawa Timur')
+            ->set('kabkota', 'Surabaya')
+            ->set('kecamatan', 'Tegalsari')
+            ->set('desa', 'Kedungdoro')
+            ->set('nama_kelompok', 'Kelompok Tani Makmur')
+            ->set('latitude', '-7.260')
+            ->set('longtitude', '112.740')
+            ->set('luas', 150)
+            ->set('kk', 75)
+            ->set('selectedStatus', 'aktif')
+            ->set('selectedGroup', 'Test Group')
+            ->set('selectedPerusahaan', 'Test Perusahaan')
+            ->set('deskripsikonflik', 'Konflik lahan tani')
+            ->set('deskripsiperjuangan', 'Perjuangan warga')
+            ->call('storeDatabase')
+            ->assertRedirect('/cms/konflik');
+
+        $this->assertDatabaseHas('konflik', [
+            'desa' => 'Kedungdoro',
+            'nama_kelompok' => 'Kelompok Tani Makmur',
+        ]);
+    }
+
+    public function test_cms_konflik_can_search_by_nama_kelompok(): void
+    {
+        $this->loginAsAdmin();
+        $this->seedGroup('Test Group');
+        $this->seedPerusahaan('Test Group', 'Test Perusahaan');
+
+        $this->seedKonflik([
+            'desa' => 'Desa A',
+            'nama_kelompok' => 'Kelompok Adat Dayak',
+            'status' => 'aktif',
+        ]);
+
+        $this->seedKonflik([
+            'desa' => 'Desa B',
+            'nama_kelompok' => 'Kelompok Nelayan Sejahtera',
+            'status' => 'aktif',
+        ]);
+
+        Livewire::test(\App\Livewire\CmsKonflik::class)
+            ->set('search', 'Dayak')
+            ->assertSee('Kelompok Adat Dayak')
+            ->assertDontSee('Kelompok Nelayan Sejahtera');
+    }
 }

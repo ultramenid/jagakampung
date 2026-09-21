@@ -11,6 +11,9 @@ class TambahInstansi extends Component
     public $nama;
 
     public function storeDatabase(){
+        if (! session('id') || (int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         if($this->manualValidation()){
             DB::table('instansi')->insert([
                 'nama' => $this->nama,

@@ -12,6 +12,9 @@ class TambahGroup extends Component
     public $nama, $deskripsi;
 
     public function storeDatabase(){
+        if (! session('id') || (int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         if($this->manualValidation()){
             DB::table('groups')->insert([
                 'nama' => $this->nama,

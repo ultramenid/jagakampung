@@ -67,6 +67,8 @@ class TambahKonflik extends Component
 
     public $desa;
 
+    public $nama_kelompok;
+
     public $latitude;
 
     public $longtitude;
@@ -120,10 +122,12 @@ class TambahKonflik extends Component
 
     public function storeDatabase()
     {
-        // dd(session()->all());
+        if (! session('id')) {
+            abort(403, 'Silakan login terlebih dahulu.');
+        }
 
-        // kalo role nya user default ke draft
-        if ((int) session('role_id') === 1) {
+        // kalo bukan admin default ke draft
+        if ((int) session('role_id') !== 0) {
             $this->selectedStatus = 'draft';
         }
 
@@ -145,6 +149,7 @@ class TambahKonflik extends Component
                 'kabkota' => $this->kabkota,
                 'kecamatan' => $this->kecamatan,
                 'desa' => $this->desa,
+                'nama_kelompok' => $this->nama_kelompok === '' ? null : $this->nama_kelompok,
                 'lat' => $this->latitude,
                 'long' => $this->longtitude,
                 'luas' => $this->luas,

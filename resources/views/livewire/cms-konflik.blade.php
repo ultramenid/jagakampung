@@ -147,7 +147,7 @@
 
             <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-gray-100">
                 <div class="flex-1 sm:flex-none">
-                    <input wire:model.live.debounce.300ms="search" type="search" placeholder="Cari desa, kecamatan, grup…" class="gk-input sm:w-72">
+                    <input wire:model.live.debounce.300ms="search" type="search" placeholder="Cari desa, kecamatan, kelompok, grup…" class="gk-input sm:w-72">
                 </div>
                 <div>
                     <select wire:model.live="filterStatus" class="gk-select sm:w-40">
@@ -169,6 +169,7 @@
                             <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Desa</th>
                             <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Kecamatan</th>
                             <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Kab/Kota</th>
+                            <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Kelompok</th>
                             <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Group</th>
                             <th class="text-left px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Perusahaan</th>
                             <th class="text-right px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-gray-400">Luas</th>
@@ -197,6 +198,7 @@
                                 <td class="px-4 py-2 font-medium text-gray-900">{{ $item->desa }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $item->kecamatan }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $item->kabkota }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $item->nama_kelompok ?: '—' }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $item->group }}</td>
                                 <td class="px-4 py-2 text-gray-600 max-w-[200px] truncate">{{ $item->perusahaan }}</td>
                                 <td class="px-4 py-2 text-right font-mono text-gray-900 tabular-nums">{{ $item->luas ? number_format($item->luas, 0, '.', ',') : '—' }}</td>
@@ -205,7 +207,7 @@
                                 <td class="px-4 py-2">
                                     <div class="flex items-center justify-end gap-2">
                                         @if ((int) session('role_id') === 0 || (int) ($item->user_id ?? 0) === (int) session('id'))
-                                            <a href="/cms/edit-konflik/{{ $item->id }}" class="gk-btn-secondary gk-btn-sm">Edit</a>
+                                             <a href="/cms/edit-konflik/{{ $item->id }}" class="gk-btn-secondary gk-btn-sm">Edit</a>
                                         @endif
                                         @if ((int) session('role_id') === 0)
                                             <button onclick="deleteKonflik({{ $item->id }})" type="button" class="gk-btn-danger gk-btn-sm">Hapus</button>
@@ -215,7 +217,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="px-4 py-12 text-center text-sm text-gray-500">Tidak ada data konflik</td>
+                                <td colspan="11" class="px-4 py-12 text-center text-sm text-gray-500">Tidak ada data konflik</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -373,10 +375,18 @@
                             fadeAnimation: true,
                         }).setView([-1.0893, 120.9213], 4);
 
-                        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                            attribution: 'Auriga | Jagakampung',
-                            minZoom: 4,
-                        }).addTo(map);
+                        if (typeof L.maplibreGL !== 'undefined') {
+                            L.maplibreGL({
+                                style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+                                attribution: 'Auriga | Jagakampung'
+                            }).addTo(map);
+                        } else {
+                            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                                subdomains: 'abcd',
+                                attribution: 'Auriga | Jagakampung',
+                                minZoom: 4,
+                            }).addTo(map);
+                        }
 
                         window.__map = map;
 
@@ -675,10 +685,11 @@ class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:borde
                             <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Lokasi</p>
                             <div class="grid grid-cols-2 gap-2">
                                 ${[
-                                    ['Provinsi',     data.data.lokasi.provinsi],
-                                    ['Kab / Kota',   data.data.lokasi.kabkota],
-                                    ['Kecamatan',    data.data.lokasi.kecamatan],
-                                    ['Desa',         data.data.lokasi.desa],
+                                    ['Provinsi',      data.data.lokasi.provinsi],
+                                    ['Kab / Kota',    data.data.lokasi.kabkota],
+                                    ['Kecamatan',     data.data.lokasi.kecamatan],
+                                    ['Desa',          data.data.lokasi.desa],
+                                    ['Nama Kelompok', data.data.lokasi.nama_kelompok],
                                 ].map(([label, val]) => `
                                             <div class="bg-gray-50 rounded-xl px-3 py-2.5">
                                                 <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">${label}</div>

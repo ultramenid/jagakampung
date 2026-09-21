@@ -138,4 +138,32 @@ class ApiTest extends TestCase
         $this->assertArrayHasKey('long', $properties);
         $this->assertArrayHasKey('user_id', $properties);
     }
+
+    public function test_rest_map_detail_draft_hidden_for_unauthenticated(): void
+    {
+        $this->createUserAndKonflik(['status' => 'draft']);
+
+        $id = DB::table('konflik')->where('status', 'draft')->value('id');
+
+        $response = $this->get('/cms/rest-map/' . $id);
+        $response->assertStatus(404);
+    }
+
+    public function test_rest_map_detail_hides_draft_articles_for_public(): void
+    {
+        $this->createUserAndKonflik(['status' => 'aktif']);
+        $id = DB::table('konflik')->where('status', 'aktif')->value('id');
+
+        DB::table('artikel')->insert([
+            ['konflik_id' => $id, 'judul_id' => 'Draft Art', 'judul_en' => 'Draft', 'slug' => 'draft-art', 'deskripsi_id' => 'D', 'deskripsi_en' => 'D', 'sumber' => 'https://example.com', 'status' => 'draft', 'tanggal_publish' => '2026-01-01', 'created_at' => now()],
+            ['konflik_id' => $id, 'judul_id' => 'Pub Art', 'judul_en' => 'Pub', 'slug' => 'pub-art', 'deskripsi_id' => 'P', 'deskripsi_en' => 'P', 'sumber' => 'https://example.com', 'status' => 'publish', 'tanggal_publish' => '2026-01-01', 'created_at' => now()],
+        ]);
+
+        $response = $this->get('/cms/rest-map/' . $id);
+        $response->assertStatus(200);
+
+        $data = json_decode($response->getContent(), true);
+        $this->assertCount(1, $data['data']['artikel']);
+        $this->assertEquals('Pub Art', $data['data']['artikel'][0]['judul_id']);
+    }
 }

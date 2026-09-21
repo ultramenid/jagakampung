@@ -51,9 +51,9 @@
                                 class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors">
                                 @php
                                     $query = trim($chooseRegion);
-                                    $name  = $value->name;
+                                    $name  = e($value->name);
                                     $highlighted = $query !== ''
-                                        ? preg_replace('/' . preg_quote($query, '/') . '/i', '<strong class="font-semibold text-gray-900">$0</strong>', $name)
+                                        ? preg_replace('/' . preg_quote(e($query), '/') . '/i', '<strong class="font-semibold text-gray-900">$0</strong>', $name)
                                         : $name;
                                 @endphp
                                 {!! $highlighted !!}
@@ -63,6 +63,12 @@
                         @endforelse
                     </div>
                 </div>
+            </div>
+
+            {{-- Nama Kelompok --}}
+            <div>
+                <label for="ek-nama-kelompok" class="gk-label">Nama Kelompok</label>
+                <input id="ek-nama-kelompok" wire:model="nama_kelompok" type="text" class="gk-input" placeholder="Masukkan nama kelompok masyarakat / adat…" />
             </div>
 
             {{-- Lat & Long --}}
@@ -335,10 +341,18 @@
             minZoom: 4
         }).setView([-1.0893, 120.9213], 4);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: 'Auriga | Jagakampung',
-            minZoom: 4,
-        }).addTo(map);
+        if (typeof L.maplibreGL !== 'undefined') {
+            L.maplibreGL({
+                style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+                attribution: 'Auriga | Jagakampung'
+            }).addTo(map);
+        } else {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                subdomains: 'abcd',
+                attribution: 'Auriga | Jagakampung',
+                minZoom: 4,
+            }).addTo(map);
+        }
 
         var marker = null;
         var geojsonLayer = null;

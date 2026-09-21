@@ -13,6 +13,9 @@ class TambahPerusahaan extends Component
     public $group, $perusahaan, $deskripsi;
 
     public function storeDatabase(){
+        if (! session('id') || (int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         if($this->manualValidation()){
             DB::table('perusahaans')->insert([
                 'group' => $this->group,

@@ -21,11 +21,14 @@ class CmsGroup extends Component
 
     public function getGroup(){
         $sc = '%' . $this->search . '%';
+        $allowedFields = ['id', 'nama', 'deskripsi'];
+        $field = in_array($this->dataField, $allowedFields, true) ? $this->dataField : 'nama';
+        $order = strtolower($this->dataOrder) === 'desc' ? 'desc' : 'asc';
         try {
             return  DB::table('groups')
                         ->select('nama','deskripsi', 'id')
                         ->where('nama', 'like', $sc)
-                        ->orderBy($this->dataField, $this->dataOrder)
+                        ->orderBy($field, $order)
                         ->paginate($this->paginate);
         } catch (\Throwable $th) {
             return [];
@@ -38,7 +41,7 @@ class CmsGroup extends Component
         $this->deleteID = null;
     }
     public function delete($id){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
 
@@ -50,7 +53,7 @@ class CmsGroup extends Component
         $this->deleter = true;
     }
     public function deleting($id){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         DB::table('groups')->where('id', $id)->delete();

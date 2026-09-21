@@ -84,6 +84,7 @@ abstract class TestCase extends BaseTestCase
             'kabkota' => 'Test Kabkota',
             'kecamatan' => 'Test Kecamatan',
             'desa' => 'Test Desa',
+            'nama_kelompok' => 'Test Kelompok',
             'lat' => '-7.250',
             'long' => '112.750',
             'luas' => 100,

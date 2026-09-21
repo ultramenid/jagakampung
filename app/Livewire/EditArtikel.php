@@ -30,8 +30,10 @@ class EditArtikel extends Component
         }
 
         // ponytail: only the konflik's owner (or admin) may edit its articles
+        $isAdmin = session('id') && (int) session('role_id') === 0;
         $konflik = DB::table('konflik')->where('id', $data->konflik_id)->first();
-        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+        $isOwner = session('id') && (int) ($konflik->user_id ?? 0) === (int) session('id');
+        if (! $konflik || (! $isAdmin && ! $isOwner)) {
             abort(403, 'Anda tidak berhak mengedit artikel ini.');
         }
 
@@ -55,14 +57,16 @@ class EditArtikel extends Component
         }
 
         // ponytail: re-check ownership on every save (artikel_id is client-mutable)
+        $isAdmin = session('id') && (int) session('role_id') === 0;
         $artikel = DB::table('artikel')->where('id', $this->artikel_id)->first();
         $konflik = $artikel ? DB::table('konflik')->where('id', $artikel->konflik_id)->first() : null;
-        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+        $isOwner = session('id') && (int) ($konflik->user_id ?? 0) === (int) session('id');
+        if (! $konflik || (! $isAdmin && ! $isOwner)) {
             abort(403, 'Anda tidak berhak mengedit artikel ini.');
         }
 
         if($this->manualValidation()) {
-            DB::transaction(function () {
+            DB::transaction(function () use ($isAdmin) {
                 $judulLama = DB::table('artikel')->where('id', $this->artikel_id)->value('judul_id');
                 $gambarLama = DB::table('artikel')->where('id', $this->artikel_id)->value('gambar');
 
@@ -88,7 +92,7 @@ class EditArtikel extends Component
                     'updated_at' => now(),
                 ];
 
-                if ((int) session('role_id') === 0) {
+                if ($isAdmin) {
                     $updateData['status'] = $this->status;
                 }
 
@@ -103,9 +107,11 @@ class EditArtikel extends Component
     // delete artikel
     public function deleteArtikel()
     {
+        $isAdmin = session('id') && (int) session('role_id') === 0;
         $artikel = DB::table('artikel')->where('id', $this->artikel_id)->first();
         $konflik = $artikel ? DB::table('konflik')->where('id', $artikel->konflik_id)->first() : null;
-        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+        $isOwner = session('id') && (int) ($konflik->user_id ?? 0) === (int) session('id');
+        if (! $konflik || (! $isAdmin && ! $isOwner)) {
             abort(403, 'Anda tidak berhak menghapus artikel ini.');
         }
         DB::table('artikel')->where('id', $this->artikel_id)->delete();
@@ -139,6 +145,9 @@ class EditArtikel extends Component
             return;
         }elseif($this->sumber == ''){
             Toaster::error('Sumber harus diisi!');
+            return;
+        }elseif(preg_match('/^\s*javascript\s*:/i', (string) $this->sumber)){
+            Toaster::error('Sumber tidak valid!');
             return;
         }elseif($this->tanggal_publish == ''){
             Toaster::error('Tanggal publish harus diisi!');

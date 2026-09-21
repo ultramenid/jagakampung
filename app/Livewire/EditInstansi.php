@@ -11,13 +11,19 @@ class EditInstansi extends Component
     public $idInstansi, $nama;
 
     public function mount($idDB){
+        if (! session('id') || (int) session('role_id') !== 0) {
+            abort(403, 'Akses terbatas untuk administrator.');
+        }
         $this->idInstansi = $idDB;
         $data = DB::table('instansi')->where('id', $this->idInstansi)->first();
+        if (! $data) {
+            abort(404);
+        }
         $this->nama = $data->nama;
     }
 
     public function storeDatabase(){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         if($this->manualValidation()){

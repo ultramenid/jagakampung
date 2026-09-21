@@ -9,13 +9,16 @@ class LocalServiceController extends Controller
 {
     public function index(){
         $query = DB::table('konflik')
-            ->select('id', 'lat', 'long', 'status', 'user_id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'luas', 'kk', 'jiwa', 'group', 'perusahaan');
+            ->select('id', 'lat', 'long', 'status', 'user_id', 'desa', 'kecamatan', 'kabkota', 'provinsi', 'nama_kelompok', 'luas', 'kk', 'jiwa', 'group', 'perusahaan');
 
         // pengguna non-admin tidak boleh melihat konflik berstatus draft milik orang lain
-        if (session('role_id') === null || (int) session('role_id') !== 0) {
+        $isAdmin = session('id') && (int) session('role_id') === 0;
+        if (! $isAdmin) {
             $query->where(function ($q) {
-                $q->where('status', '!=', 'draft')
-                  ->orWhere('user_id', session('id'));
+                $q->where('status', '!=', 'draft');
+                if (session('id')) {
+                    $q->orWhere('user_id', session('id'));
+                }
             });
         }
 
@@ -42,6 +45,7 @@ class LocalServiceController extends Controller
                             'kecamatan' => $value['kecamatan'],
                             'kabkota' => $value['kabkota'],
                             'provinsi' => $value['provinsi'],
+                            'nama_kelompok' => $value['nama_kelompok'] ?? null,
                             'luas' => $value['luas'],
                             'kk' => $value['kk'],
                             'jiwa' => $value['jiwa'],
@@ -56,7 +60,7 @@ class LocalServiceController extends Controller
     }
 
     public function kasusDetail(Request $request, $id){
-        $isAdmin = (int) session('role_id') === 0;
+        $isAdmin = session('id') !== null && (int) session('role_id') === 0;
         $isPublic = ! $isAdmin;
 
         $data = DB::table('konflik')->where('konflik.id', $id)->first();
@@ -93,6 +97,7 @@ class LocalServiceController extends Controller
                     'kabkota' => $data->kabkota,
                     'kecamatan' => $data->kecamatan,
                     'desa' => $data->desa,
+                    'nama_kelompok' => $data->nama_kelompok,
                     'koordinat' => [
                         'lat' => (float) $data->lat,
                         'lng' => (float) $data->long,

@@ -29,6 +29,7 @@ class EditKonflik extends Component
         $kabkota,
         $kecamatan,
         $desa,
+        $nama_kelompok,
         $latitude,
         $longtitude,
         $geom;
@@ -40,19 +41,20 @@ class EditKonflik extends Component
         $this->idDB = $idDB;
 
         $data = DB::table("konflik")->where("konflik.id", $idDB)->first();
+        if (! $data) {
+            abort(404);
+        }
 
-        // dd($data);
-        // ponytail: IDOR guard — only the owner or an admin may edit this konflik
-        if (
-            (int) session("role_id") !== 0 &&
-            (int) ($data->user_id ?? 0) !== (int) session("id")
-        ) {
+        $isAdmin = session('id') && (int) session('role_id') === 0;
+        $isOwner = session('id') && (int) ($data->user_id ?? 0) === (int) session('id');
+        if (! $isAdmin && ! $isOwner) {
             abort(403, "Anda tidak berhak mengedit konflik ini.");
         }
         $this->provinsi = $data->provinsi;
         $this->kabkota = $data->kabkota;
         $this->kecamatan = $data->kecamatan;
         $this->desa = $data->desa;
+        $this->nama_kelompok = $data->nama_kelompok ?? null;
         $this->latitude = $data->lat;
         $this->longtitude = $data->long;
         $this->luas = (float) $data->luas;
@@ -132,8 +134,9 @@ class EditKonflik extends Component
 
     public function storeDatabase()
     {
+        $isAdmin = session('id') && (int) session('role_id') === 0;
         // ponytail: non-admins may never publish (mirrors TambahKonflik)
-        if ((int) session("role_id") !== 0) {
+        if (! $isAdmin) {
             $this->selectedStatus = "draft";
         }
         // ponytail: validate new image uploads (no mimes rule existed before)
@@ -145,11 +148,8 @@ class EditKonflik extends Component
 
         // ponytail: re-check ownership on every save (mount's 403 only fires on first render; idDB is client-mutable)
         $konflik = DB::table("konflik")->where("id", $this->idDB)->first();
-        if (
-            !$konflik ||
-            ((int) session("role_id") !== 0 &&
-                (int) ($konflik->user_id ?? 0) !== (int) session("id"))
-        ) {
+        $isOwner = session('id') && (int) ($konflik->user_id ?? 0) === (int) session('id');
+        if (! $konflik || (! $isAdmin && ! $isOwner)) {
             abort(403, "Anda tidak berhak mengedit konflik ini.");
         }
 
@@ -162,6 +162,7 @@ class EditKonflik extends Component
                     "kabkota" => $this->kabkota,
                     "kecamatan" => $this->kecamatan,
                     "desa" => $this->desa,
+                    "nama_kelompok" => $this->nama_kelompok === "" ? null : $this->nama_kelompok,
                     "lat" => $this->latitude,
                     "long" => $this->longtitude,
                     "luas" => $this->luas,

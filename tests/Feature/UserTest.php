@@ -251,4 +251,37 @@ class UserTest extends TestCase
         // id === session('id')), so the admin's own account must still exist.
         $this->assertDatabaseHas('users', ['id' => $adminId]);
     }
+
+    public function test_unauthenticated_cannot_delete_user_via_livewire(): void
+    {
+        // Session is empty (no login)
+        $id = DB::table('users')->insertGetId([
+            'name' => 'Victim User',
+            'email' => 'victim@test.com',
+            'password' => Hash::make('secret'),
+            'instansi' => 'Test',
+            'role' => 1,
+            'is_active' => 1,
+        ]);
+
+        Livewire::test(\App\Livewire\CmsUsers::class)
+            ->call('deleting', $id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('users', ['id' => $id]);
+    }
+
+    public function test_unauthenticated_cannot_create_user_via_livewire(): void
+    {
+        Livewire::test(\App\Livewire\TambahUser::class)
+            ->set('nama', 'Hacker')
+            ->set('email', 'hacker@test.com')
+            ->set('password', 'pwned123')
+            ->set('role', 0)
+            ->set('instansi', 'Evil Corp')
+            ->call('storeDatabase')
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('users', ['email' => 'hacker@test.com']);
+    }
 }

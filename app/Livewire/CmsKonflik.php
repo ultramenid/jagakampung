@@ -22,10 +22,13 @@ class CmsKonflik extends Component
             ->select('konflik.*')
             ->orderByDesc('konflik.id');
 
-        if ((int) session('role_id') !== 0) {
+        $isAdmin = session('id') && (int) session('role_id') === 0;
+        if (! $isAdmin) {
             $query->where(function ($q) {
-                $q->where('status', '!=', 'draft')
-                  ->orWhere('user_id', session('id'));
+                $q->where('status', '!=', 'draft');
+                if (session('id')) {
+                    $q->orWhere('user_id', session('id'));
+                }
             });
         }
 
@@ -38,6 +41,7 @@ class CmsKonflik extends Component
                   ->orWhere('kecamatan', $like, $term)
                   ->orWhere('kabkota', $like, $term)
                   ->orWhere('provinsi', $like, $term)
+                  ->orWhere('nama_kelompok', $like, $term)
                   ->orWhere('group', $like, $term)
                   ->orWhere('perusahaan', $like, $term);
             });

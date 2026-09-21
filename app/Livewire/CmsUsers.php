@@ -35,7 +35,7 @@ class CmsUsers extends Component
         $this->deleteID = null;
     }
     public function delete($id){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
 
@@ -47,7 +47,7 @@ class CmsUsers extends Component
         $this->deleter = true;
     }
     public function deleting($id){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         if ((int) $id === (int) session('id')) {

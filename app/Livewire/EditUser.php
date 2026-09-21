@@ -12,7 +12,7 @@ class EditUser extends Component
     public $idUser, $name, $email, $password, $role, $instansi;
 
     public function mount($idDB){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         $this->idUser = $idDB;
@@ -24,7 +24,7 @@ class EditUser extends Component
     }
 
     public function storeDatabase(){
-        if ((int) session('role_id') !== 0) {
+        if (! session('id') || (int) session('role_id') !== 0) {
             abort(403, 'Akses terbatas untuk administrator.');
         }
         if($this->manualValidation()){

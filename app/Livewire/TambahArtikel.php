@@ -37,8 +37,10 @@ class TambahArtikel extends Component
         ]);
 
         // ponytail: only attach articles to a konflik you own (or admin)
+        $isAdmin = session('id') && (int) session('role_id') === 0;
         $konflik = DB::table('konflik')->where('id', $this->konflik_id)->first();
-        if (! $konflik || ((int) session('role_id') !== 0 && (int) ($konflik->user_id ?? 0) !== (int) session('id'))) {
+        $isOwner = session('id') && (int) ($konflik->user_id ?? 0) === (int) session('id');
+        if (! $konflik || (! $isAdmin && ! $isOwner)) {
             abort(403, 'Anda tidak berhak menambah artikel ke konflik ini.');
         }
 
@@ -59,7 +61,7 @@ class TambahArtikel extends Component
 
         if($this->manualValidation()) {
             $status = in_array($this->status, ['draft', 'publish'], true) ? $this->status : 'draft';
-            if ((int) session('role_id') !== 0) {
+            if (! $isAdmin) {
                 $status = 'draft';
             }
             DB::table('artikel')->insert([
@@ -106,6 +108,9 @@ class TambahArtikel extends Component
             return;
         }elseif($this->sumber == ''){
             Toaster::error('Sumber harus diisi!');
+            return;
+        }elseif(preg_match('/^\s*javascript\s*:/i', (string) $this->sumber)){
+            Toaster::error('Sumber tidak valid!');
             return;
         }elseif($this->tanggal_publish == ''){
             Toaster::error('Tanggal publish harus diisi!');
