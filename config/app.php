@@ -15,6 +15,12 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // HTTP Basic Auth for the public map; disabled when password is empty.
+    'frontend_auth' => [
+        'user' => env('FRONTEND_AUTH_USER', 'jagakampung'),
+        'password' => env('FRONTEND_AUTH_PASSWORD'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
